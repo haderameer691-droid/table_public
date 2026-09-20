@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <title>سجل غياب التلاميذ الرقمي المطور | نظام الإدارة الشامل</title>
+    
+    <style>
+        /* منع تحديد أو تظليل النصوص بالكامل في كل عناصر الصفحة */
+        * {
+            -webkit-user-select: none !important; /* Safari */
+            -moz-user-select: none !important;    /* Firefox */
+            -ms-user-select: none !important;     /* IE10+ */
+            user-select: none !important;         /* Standard */
+        }
+        /* السماح بالتحديد فقط داخل حقول الإدخال لتسهيل الكتابة للمستخدم */
+        input, select, textarea {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+    </style>
+    
+    <script>
+        // 1. تعطيل الزر الأيمن للفأرة تماماً
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // 2. حظر اختصارات لوحة التحكم وعرض المصدر والنسخ والقص والحفظ
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode === 123) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 74) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.keyCode === 85) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.keyCode === 83) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.keyCode === 67) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.keyCode === 88) { e.preventDefault(); return false; }
+        });
+
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); });
+        setInterval(function() { debugger; }, 50);
+    </script>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
+        .container { max-width: 100%; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        
+        /* شريط العنوان ممركز بنسبة 75% */
+        h1 { 
+            text-align: center; 
+            color: #ffffff; 
+            background: linear-gradient(135deg, #194209, #210d4e); 
+            margin: 0 auto 15px auto; 
+            padding: 18px; 
+            border-radius: 8px; 
+            font-size: 25px; 
+            width: 30%; 
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+        }
+
+        /* شريط معلومات الطباعة العلوي */
+        .print-header-meta {
+            display: none;
+            width: 95%;
+            margin: 0 auto 20px auto;
+            justify-content: space-between;
+            align-items: flex-start;
+            background-color: #f1f5f9;
+            padding: 12px 20px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1e3a8a;
+        }
+        .meta-right-column { text-align: right; display: flex; flex-direction: column; gap: 5px; font-weight: bold; }
+        .meta-left-column { text-align: right; display: flex; flex-direction: column; gap: 5px; font-weight: bold; }
+
+        /* System Controls */
+        .system-controls { background: #e0e7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #c7d2fe; flex-wrap: wrap; gap: 10px; }
+        .class-selector-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .class-selector-group select { padding: 8px 12px; border: 2px solid #4f46e5; border-radius: 6px; font-weight: bold; font-size: 14px; outline: none; }
+        .btn-system { padding: 8px 15px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; transition: all 0.2s; color: white; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-add-class { background-color: #4f46e5; } .btn-add-class:hover { background-color: #4338ca; }
+        .btn-edit-class { background-color: #0284c7; } .btn-edit-class:hover { background-color: #0369a1; }
+        .btn-delete-class { background-color: #be123c; } .btn-delete-class:hover { background-color: #9f1239; }
+        .btn-backup { background-color: #475569; } .btn-backup:hover { background-color: #334155; }
+        .btn-restore { background-color: #0f766e; } .btn-restore:hover { background-color: #0d5a54; }
+
+        /* Search Section */
+        .search-section { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        .search-title { font-size: 14px; font-weight: 700; color: #1e3a8a; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .search-input-group { display: flex; gap: 10px; }
+        .search-input-group input { flex: 1; padding: 10px 15px; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; font-weight: 600; transition: border 0.2s; }
+        .search-input-group input:focus { border-color: #2563eb; background-color: #fff; }
+        .btn-search { background-color: #1e3a8a; color: white; border: none; padding: 0 25px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; }
+        .btn-search:hover { background-color: #1e40af; }
+        .search-results-box { display: none; margin-top: 15px; background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+
+        /* Control Panel */
+        .control-panel { background: #f1f5f9; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 25px; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .info-grid .info-field { display: flex; flex-direction: column; }
+        .info-grid .info-field label { font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px; }
+        .info-grid .info-field input, .info-grid .info-field select { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; background-color: white; outline: none; font-weight: 600; }
+        .info-grid .info-field select { border: 2px solid #2563eb; }
+        
+        .buttons-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 15px; flex-wrap: wrap; gap: 10px; }
+        .autosave-badge { background-color: #f0fdf4; border: 1px solid #16a34a; color: #14532d; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; color: white; }
+        .btn-print-report { background-color: #2563eb; }
+        .btn-add-student { background-color: #ea580c; }
+        .btn-import-excel { background-color: #7c3aed; }
+        .btn-sort-students { background-color: #0f172a; }
+        .btn-clear-data { background-color: #dc2626; }
+        .btn-clear-data:hover { background-color: #b91c1c; }
+        
+        /* Table Layout Core Settings */
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid #cbd5e0; border-radius: 8px; margin-bottom: 25px; }
+        table { width: max-content; min-width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #cbd5e0; padding: 5px 2px; text-align: center; font-size: 13px; }
+        
+        /* عناوين الجدول العامة باللون الأزرق الكحلي */
+        th { background-color: #1e40af; color: white; font-weight: 700; }
+        
+        /* عناوين الأعمدة الأربعة الأولى بلون فاتح مائل للرمادي وخط أسود داكن غامق وثابت */
+        th.light-header {
+            background-color: #f1f5f9 !important;
+            color: #000000 !important;
+            font-weight: 800 !important;
+        }
+        
+        .col-num { width: 35px; min-width: 35px; }
+        .col-qayd { width: 65px; min-width: 65px; }
+        .col-name { width: 145px; min-width: 145px; max-width: 150px; }
+        .col-birth { width: 65px; min-width: 65px; } 
+        .col-stat { width: 55px; min-width: 55px; background-color: #2563eb; }
+        .col-leave { width: 55px; min-width: 55px; background-color: #d97706; }
+        .col-delete-action { width: 95px; min-width: 95px; background-color: #dc2626; color: white; }
+        .btn-transfer-student { background-color: #0891b2; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px; }
+        .btn-transfer-student:hover { background-color: #0e7490; }
+        .btn-delete-student { background-color:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px; }
+        .btn-delete-student:hover { background-color:#dc2626; }
+
+        /* نافذة ترحيل التلميذ المنبثقة */
+        .transfer-modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.55); z-index:1000; align-items:center; justify-content:center; }
+        .transfer-modal-box { background:#fff; width:90%; max-width:420px; border-radius:10px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+        .transfer-modal-title { font-size:16px; font-weight:800; color:#0e7490; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+        .transfer-modal-box select { width:100%; padding:10px 12px; border:2px solid #0891b2; border-radius:6px; font-size:14px; font-weight:600; margin-bottom:16px; }
+        .transfer-modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+        .transfer-modal-actions button { padding:8px 16px; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:13px; }
+        .btn-transfer-confirm { background:#0891b2; color:#fff; }
+        .btn-transfer-confirm:hover { background:#0e7490; }
+        .btn-transfer-cancel { background:#e2e8f0; color:#1e293b; }
+        .btn-transfer-cancel:hover { background:#cbd5e1; }
+        .col-day-cell { width: 38px; min-width: 38px; max-width: 42px; }
+        
+        /* التثبيت الجانبي للأعمدة */
+        .sticky-column { position: sticky; right: 0; background-color: white; z-index: 2; }
+        tr:nth-child(even) .sticky-column { background-color: #f8fafc; }
+        
+        /* إجبار عناوين الاستيكي الفاتحة على الاحتفاظ بلونها الفاتح والخط الأسود الغامق */
+        th.sticky-column.light-header { 
+            z-index: 4; 
+            background-color: #f1f5f9 !important; 
+            color: #000000 !important;
+        }
+
+        .input-cell { 
+            width: 100%; 
+            border: none; 
+            background: transparent; 
+            padding: 6px 4px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            color: #1e293b; 
+            outline: none;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .input-cell:focus { background-color: #e2e8f0; border-radius: 4px; white-space: normal; overflow: visible; }
+        
+        .total-absent { font-weight: 700; color: #1e3a8a; background-color: #f1f5f9 !important; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 45px;}
+        .total-leave { font-weight: 700; color: #b45309; background-color: #fefce8 !important; }
+        
+        /* Warning Badges */
+        .badge { font-size: 9px; border-radius: 4px; padding: 1px 3px; margin-top: 2px; font-weight: bold; width: 95%; text-align: center; }
+        .warn-1 { background-color: #fef08a; color: #854d0e; }
+        .warn-2 { background-color: #fdba74; color: #c2410c; }
+        .warn-3 { background-color: #fca5a5; color: #b91c1c; }
+        .warn-expelled { background-color: #0f172a; color: #f8fafc; }
+
+        select.attendance-select { width: 100%; padding: 2px 0; border: 1px solid #cbd5e0; border-radius: 4px; background-color: #ffffff; font-size: 12px; text-align: center; cursor: pointer; font-weight: bold; outline: none; text-align-last: center; }
+
+        .status-present, .status-present select { background-color: #dcfce7 !important; color: #15803d !important; }
+        .status-absent, .status-absent select { background-color: #fee2e2 !important; color: #b91c1c !important; }
+        .status-leave, .status-leave select { background-color: #fef08a !important; color: #854d0e !important; }
+        .status-holiday, .status-holiday select { background-color: #fef9c3 !important; color: #a16207 !important; }
+
+        /* Security Module Controls */
+        .lock-hdr-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 32px; }
+        .btn-day-lock, .btn-day-unlock, .btn-all-holiday { padding: 1px 2px; font-size: 9px; border-radius: 3px; cursor: pointer; border: none; font-weight: 600; width: 100%; text-align: center; }
+        .btn-day-lock { background-color: #ea580c; color: white; }
+        .btn-day-unlock { background-color: #475569; color: white; }
+        .btn-all-holiday { background-color: #a16207; color: white; }
+        
+        .locked-column-hdr { background: linear-gradient(180deg, #1e40af, #0f172a) !important; }
+        .holiday-locked-hdr { background: linear-gradient(180deg, #a16207, #451a03) !important; }
+        .locked-cell { background-color: #e2e8f0 !important; }
+        .locked-cell select { pointer-events: none; background-color: #cbd5e0 !important; color: #475569 !important; border: none; }
+
+        .report-section { background: #ffffff; border: 2px solid #2563eb; border-radius: 8px; padding: 20px; margin-top: 25px; }
+        .report-header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px; }
+        .report-title { font-size: 16px; font-weight: 700; color: #1e40af; }
+        .report-table { width: 100%; border-collapse: collapse; }
+        .report-table th { background-color: #475569; color: white; padding: 8px; font-size: 13px; }
+        .report-table td { padding: 8px; border: 1px solid #cbd5e0; font-size: 13px; }
+        .report-no-data { text-align: center; padding: 20px; color: #16a34a; background-color: #f0fdf4; border-radius: 6px; font-weight: 600; border: 1px dashed #16a34a; }
+        
+        /* تذييل التوقيع للمدير الموجه لجهة اليمين بالأسفل */
+        .report-signatures { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; padding: 15px 10px 0 10px; margin-top: 20px; border-top: 1px solid #cbd5e1; width: 100%; direction: rtl; }
+        .signature-item-right { text-align: right; width: 45%; font-weight: bold; }
+        .signature-item-left { text-align: left; width: 45%; font-weight: bold; display: none; }
+
+        /* ======================== هوامش وخيارات الطباعة المحسنة للـ A4 وتثبيت النص الأسود الغامق ======================== */
+        @media print {
+            @page { 
+                size: A4 landscape; 
+                margin: 12mm 10mm 15mm 10mm !important; 
+            }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { background-color: white; padding: 0mm !important; margin: 0 !important; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; width: 100%; }
+            
+            .print-header-meta { display: flex !important; }
+            
+            h1 { 
+                width: 75% !important; 
+                margin: 0 auto 10px auto !important;
+                border: 1px solid #1e3a8a !important;
+            }
+            
+            .control-panel, .system-controls, .search-section, .btn-day-lock, .btn-day-unlock, .btn-all-holiday, .autosave-badge, .btn-add-student { display: none !important; }
+            .lock-hdr-wrapper button { display: none !important; }
+            .col-delete-action, td.delete-cell, .transfer-modal-overlay { display: none !important; }
+            
+            /* إلغاء الـ sticky لضمان اتساق الجدول في الطباعة */
+            .sticky-column { 
+                position: static !important; 
+                background-color: transparent !important; 
+                box-shadow: none !important; 
+            }
+            
+            /* ضمان بقاء العناوين الأربعة الأولى بالخط الأسود الغامق حتى لو اختفت التعبئة */
+            th.light-header {
+                background-color: #f1f5f9 !important;
+                color: #000000 !important;
+                font-weight: 800 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* العناوين الأخرى تحافظ على لونها الأزرق */
+            th:not(.light-header) {
+                background-color: #1e40af !important;
+                color: #ffffff !important;
+            }
+
+            /* إجبار حقول الإدخال (الأسماء والأرقام) على البقاء باللون الأسود الواضح */
+            .input-cell {
+                color: #000000 !important;
+                font-weight: bold !important;
+            }
+            
+            .table-container { overflow: visible !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; border: 1px solid #000 !important; }
+            table { width: 100% !important; table-layout: fixed !important; }
+            
+            .col-num { width: 3% !important; min-width: 3% !important; }
+            .col-qayd { width: 6% !important; min-width: 6% !important; }
+            .col-name { width: 14% !important; min-width: 14% !important; max-width: 14% !important; text-align: right !important; } 
+            .col-birth { width: 6% !important; min-width: 6% !important; }
+            .col-stat { width: 5% !important; min-width: 5% !important; }
+            .col-leave { width: 5% !important; min-width: 5% !important; }
+            
+            .col-day-cell { width: auto !important; max-width: none !important; min-width: 0 !important; font-size: 11px !important; }
+            th, td { padding: 4px 1px !important; font-size: 11px !important; border: 1px solid #000 !important; }
+            
+            .input-cell { 
+                font-size: 11px !important; 
+                white-space: nowrap !important; 
+                overflow: hidden !important; 
+                text-overflow: clip !important;
+            }
+            
+            select.attendance-select { border: none !important; appearance: none; -webkit-appearance: none; background: transparent !important; font-size: 11px; text-align: center; width: 100%; }
+
+            body:not(.print-only-report) #mainTableSignatures { display: flex !important; }
+
+            body.print-only-report .control-panel, body.print-only-report h1, body.print-only-report .print-header-meta, body.print-only-report .table-container, body.print-only-report .system-controls { display: none !important; }
+            body.print-only-report .report-section { border: 1px solid #000; margin-top: 0; padding: 10px; }
+            body.print-only-report #reportBoxSignatures { display: flex !important; }
+            body.print-only-report .signature-item-left { display: block !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 id="mainTitle">سجل الحضور والغياب للتلاميذ</h1>
+    
+    <div class="print-header-meta" id="printHeaderMetaBar">
+        <div class="meta-right-column">
+            <div>المدرسة: <span id="lblPrintSchool">-</span></div>
+            <div>الصف: <span id="lblPrintClass">-</span> / شعبة: <span id="lblPrintSection">-</span></div>
+            <div>مرشد الصف: <span id="lblPrintGuide">-</span></div>
+        </div>
+        <div class="meta-left-column">
+            <div>العام الدراسي: <span id="lblPrintYear">-</span></div>
+            <div>الشهر الدراسي: <span id="lblPrintMonth">-</span></div>
+        </div>
+    </div>
+    
+    <div class="system-controls">
+        <div class="class-selector-group">
+            <label style="font-weight:bold; color:#1e3a8a;">الصف الدراسي الفعال:</label>
+            <select id="globalClassSelector" onchange="switchGlobalClass()"></select>
+            <button class="btn-system btn-add-class" onclick="addNewClassProfile()">➕ إضافة صف/شعبة جديدة</button>
+            <button class="btn-system btn-edit-class" onclick="openClassTransferModal()">✏️ ترحيل الصف والشعبة</button>
+            <button class="btn-system btn-delete-class" onclick="deleteCurrentClassProfile()">🗑️ حذف الصف الفعال الحالي</button>
+        </div>
+        <div class="class-selector-group">
+            <input type="file" id="importDbInput" style="display:none" onchange="importDatabase(event)">
+            <button class="btn-system btn-restore" onclick="document.getElementById('importDbInput').click()">📂 استيراد نسخة احتياطية</button>
+            <button class="btn-system btn-backup" onclick="exportDatabase()">💾 تصدير قاعدة البيانات</button>
+        </div>
+    </div>
+
+    <div class="search-section">
+        <div class="search-title">🔍 محرك البحث الشامل (في جميع الصفوف والشعب)</div>
+        <div class="search-input-group">
+            <input type="text" id="globalSearchInput" placeholder="أدخل اسم التلميذ أو رقم القيد للبحث الفوري وعرض تفاصيل الغيابات والإجازات..." onkeypress="if(event.key === 'Enter') executeGlobalSearch()">
+            <button class="btn-search" onclick="executeGlobalSearch()">بحث تفصيلي</button>
+        </div>
+        <div class="search-results-box" id="searchResultsBox">
+            <div style="font-weight: bold; margin-bottom: 10px; color:#1e3a8a; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">📋 نتائج البحث والتتبع:</div>
+            <div id="searchResultsContainer"></div>
+        </div>
+    </div>
+
+    <div class="control-panel">
+        <div class="info-grid">
+            <div class="info-field">
+                <label>اسم المدرسة:</label>
+                <input type="text" id="schoolInput" oninput="syncClassMeta('school')" placeholder="أدخل اسم المدرسة...">
+            </div>
+            <div class="info-field">
+                <label>العام الدراسي:</label>
+                <select id="yearSelector" onchange="switchActiveAcademicYear(); triggerAutosave();">
+                    <option value="2026_2027" selected>2026-2027</option>
+                    <option value="2027_2028">2027-2028</option>
+                    <option value="2028_2029">2028-2029</option>
+                    <option value="2029_2030">2029-2030</option>
+                    <option value="2030_2031">2030-2031</option>
+                    <option value="2031_2032">2031-2032</option>
+                    <option value="2032_2033">2032-2033</option>
+                    <option value="2033_2034">2033-2034</option>
+                    <option value="2034_2035">2034-2035</option>
+                </select>
+            </div>
+            <div class="info-field">
+                <label>اختر الشهر الدراسي الفعال:</label>
+                <select id="monthSelector" onchange="switchActiveMonthView(); triggerAutosave();"></select>
+            </div>
+            <div class="info-field">
+                <label>الصف الدراسي:</label>
+                <input type="text" id="classInput" oninput="syncClassMeta('cls')">
+            </div>
+            <div class="info-field">
+                <label>الشعبة:</label>
+                <input type="text" id="sectionInput" oninput="syncClassMeta('sec')">
+            </div>
+            <div class="info-field">
+                <label>مرشد الصف:</label>
+                <input type="text" id="guideInput" oninput="syncClassMeta('guide')" placeholder="اسم المرشد...">
+            </div>
+            <div class="info-field">
+                <label>مدير المدرسة:</label>
+                <input type="text" id="managerInput" oninput="syncClassMeta('manager')" placeholder="اسم مدير المدرسة...">
+            </div>
+        </div>
+        
+        <div class="buttons-row">
+            <div class="autosave-badge" id="autosaveStatus">
+                <span>تلقائي الحفظ مفعل</span>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-import-excel" onclick="openExcelImportDialog()">📋 استيراد الأسماء من Excel</button>
+                <button class="btn btn-add-student" onclick="addNewStudentRowClick()">➕ إضافة تلميذ</button>
+                <button class="btn btn-sort-students" onclick="sortStudentsAlphabetically()">🔀 فرز الأسماء أبجدياً</button>
+                <button class="btn btn-clear-data" onclick="clearActiveProfileData()">⚠️ حذف البيانات الحالية</button>
+                <button class="btn btn-print-report" onclick="printMonthlyReport()">📋 طباعة التقرير الشهري</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="attendanceTable">
+            <thead>
+                <tr id="primaryHeaderRow">
+                    <th rowspan="2" class="col-num sticky-column light-header" style="right: 0;">ت</th>
+                    <th rowspan="2" class="col-qayd sticky-column light-header" style="right: 35px;">رقم القيد</th>
+                    <th rowspan="2" class="col-name sticky-column light-header" style="right: 100px;">اسم التلميذ ثلاثي</th>
+                    <th rowspan="2" class="col-birth sticky-column light-header" style="right: 245px;">سنة التولد</th>
+                    <th rowspan="2" class="col-stat">مجموع الغياب</th>
+                    <th rowspan="2" class="col-leave" style="color: white;">عدد الإجازات</th>
+                    <th rowspan="2" class="col-delete-action">إجراءات</th>
+                    <th id="dynamicMonthHdrLabel" colspan="0" style="background-color: #1e3a8a;">أيام الشهر</th>
+                </tr>
+                <tr id="secondaryDaysRow"></tr>
+            </thead>
+            <tbody id="studentTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="report-signatures" id="mainTableSignatures" style="display: none; border-top:none; direction: rtl;">
+        <div class="signature-item-right">مدير المدرسة: <span class="lbl-manager-name" style="color:#1e3a8a;">-</span></div>
+    </div>
+    
+    <div class="report-section" id="monthlyReportBox">
+        <div class="report-header">
+            <div class="report-title" id="reportBoxTitle">📋 كشف غيابات التلاميذ الشهري</div>
+            <div style="font-weight: bold; font-size:14px; color:#475569;" id="reportBoxSchoolLabel">المدرسة: -</div>
+        </div>
+        <div id="reportTableContainer"></div>
+        
+        <div class="report-signatures" id="reportBoxSignatures" style="direction: rtl;">
+            <div class="signature-item-right" style="width:50%; text-align: right;">مدير المدرسة: <span class="lbl-manager-name" style="color:#1e3a8a;">-</span></div>
+            <div class="signature-item-left" style="width:50%; text-align: left; padding-left: 20px;">مرشد الصف: <span class="lbl-guide-name">-</span></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- نافذة ترحيل التلميذ إلى صف/شعبة أخرى -->
+<div class="transfer-modal-overlay" id="transferModalOverlay">
+    <div class="transfer-modal-box">
+        <div class="transfer-modal-title">🔀 ترحيل التلميذ: <span id="transferStudentNameLbl">-</span></div>
+        <label style="font-size:13px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">اختر الصف/الشعبة المراد الترحيل إليه:</label>
+        <select id="transferTargetClassSelect"></select>
+        <div class="transfer-modal-actions">
+            <button type="button" class="btn-transfer-cancel" onclick="closeTransferModal()">إلغاء</button>
+            <button type="button" class="btn-transfer-confirm" onclick="confirmStudentTransfer()">تأكيد الترحيل</button>
+        </div>
+    </div>
+</div>
+
+<!-- نافذة ترحيل الصف والشعبة الحالية بالكامل إلى صف/شعبة أخرى -->
+<div class="transfer-modal-overlay" id="classTransferModalOverlay">
+    <div class="transfer-modal-box">
+        <div class="transfer-modal-title">🔀 ترحيل الصف والشعبة: <span id="classTransferSourceLbl">-</span></div>
+        <label style="font-size:13px; font-weight:700; color:#475569; display:block; margin-bottom:6px;">اختر الصف/الشعبة المراد ترحيل جميع تلاميذ الصف الحالي إليه:</label>
+        <select id="classTransferTargetSelect"></select>
+        <div class="transfer-modal-actions">
+            <button type="button" class="btn-transfer-cancel" onclick="closeClassTransferModal()">إلغاء</button>
+            <button type="button" class="btn-transfer-confirm" onclick="confirmClassTransfer()">تأكيد الترحيل</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const safeStorage = {
+        getItem: function(key) { try { return localStorage.getItem(key); } catch(e) { return null; } },
+        setItem: function(key, val) { try { localStorage.setItem(key, val); return true; } catch(e) { return false; } }
+    };
+
+    const monthsTemplate = [
+        { name: "أيلول (سبتمبر)", value: "9", startYearOffset: 0 },
+        { name: "تشرين الأول (أكتوبر)", value: "10", startYearOffset: 0 },
+        { name: "تشرين الثاني (نوفمبر)", value: "11", startYearOffset: 0 },
+        { name: "كانون الأول (ديسمبر)", value: "12", startYearOffset: 0 },
+        { name: "كانون الثاني (يناير)", value: "1", startYearOffset: 1 },
+        { name: "شباط (فبراير)", value: "2", startYearOffset: 1 },
+        { name: "آذار (مارس)", value: "3", startYearOffset: 1 },
+        { name: "نيسان (أبريل)", value: "4", startYearOffset: 1 },
+        { name: "أيار (مايو)", value: "5", startYearOffset: 1 },
+        { name: "حزيران (يونيو)", value: "6", startYearOffset: 1 }
+    ];
+
+    function generateWorkingDaysForMonth(year, month) {
+        let days = [];
+        let date = new Date(year, month - 1, 1);
+        while (date.getMonth() === month - 1) {
+            let dayOfWeek = date.getDay();
+            if (dayOfWeek !== 5 && dayOfWeek !== 6) {
+                let yyyy = date.getFullYear();
+                let mm = String(date.getMonth() + 1).padStart(2, '0');
+                let dd = String(date.getDate()).padStart(2, '0');
+                days.push(`${yyyy}-${mm}-${dd}`);
+            }
+            date.setDate(date.getDate() + 1);
+        }
+        return days;
+    }
+
+    let monthlyDatesConfig = {};
+    function buildAcademicYearDates(yearComboValue) {
+        monthlyDatesConfig = {};
+        const parts = yearComboValue.split('_');
+        const startYear = parseInt(parts[0], 10);
+        
+        monthsTemplate.forEach(m => {
+            const actualYear = startYear + m.startYearOffset;
+            const monthVal = parseInt(m.value, 10);
+            const key = `${yearComboValue}_${monthVal}`;
+            monthlyDatesConfig[key] = generateWorkingDaysForMonth(actualYear, monthVal);
+        });
+    }
+
+    let appState = {
+        pin: null,
+        activeClassId: 'default_cls',
+        classes: {
+            'default_cls': {
+                meta: { school: "", cls: "", sec: "", guide: "", manager: "", currentYear: "2026_2027" },
+                currentCount: 1,
+                studentRecords: {},
+                attendance: {}, lockedDays: {}, holidayDays: {}
+            }
+        }
+    };
+    
+    let autosaveTimer;
+
+    function initDataStructures(clsId, yearKey) {
+        monthsTemplate.forEach(m => {
+            const mKey = `${yearKey}_${m.value}`;
+            if (!appState.classes[clsId].attendance[mKey]) appState.classes[clsId].attendance[mKey] = {};
+            if (!appState.classes[clsId].lockedDays[mKey]) appState.classes[clsId].lockedDays[mKey] = [];
+            if (!appState.classes[clsId].holidayDays[mKey]) appState.classes[clsId].holidayDays[mKey] = [];
+        });
+    }
+
+    function switchActiveAcademicYear() {
+        const yearSelector = document.getElementById('yearSelector');
+        const activeCls = appState.classes[appState.activeClassId];
+        activeCls.meta.currentYear = yearSelector.value;
+        
+        document.getElementById('lblPrintYear').textContent = yearSelector.options[yearSelector.selectedIndex].text;
+        
+        buildAcademicYearDates(yearSelector.value);
+        initDataStructures(appState.activeClassId, yearSelector.value);
+        
+        const monthSelector = document.getElementById('monthSelector');
+        let selectedIndexBefore = monthSelector.selectedIndex >= 0 ? monthSelector.selectedIndex : 1;
+        
+        let monthOptionsHtml = '';
+        monthsTemplate.forEach(m => {
+            const key = `${yearSelector.value}_${m.value}`;
+            const yearOffsetLabel = (m.startYearOffset === 0) ? yearSelector.value.split('_')[0] : yearSelector.value.split('_')[1];
+            monthOptionsHtml += `<option value="${key}">${m.name} ${yearOffsetLabel}</option>`;
+        });
+        monthSelector.innerHTML = monthOptionsHtml;
+        monthSelector.selectedIndex = selectedIndexBefore;
+        
+        switchActiveMonthView();
+    }
+
+    function syncClassMeta(field) {
+        const val = document.getElementById(field + 'Input').value;
+        appState.classes[appState.activeClassId].meta[field] = val;
+        
+        if(field === 'school') {
+            document.getElementById('lblPrintSchool').textContent = val || "-";
+            document.getElementById('reportBoxSchoolLabel').textContent = "المدرسة: " + (val || "-");
+        }
+        if(field === 'cls') document.getElementById('lblPrintClass').textContent = val || "-";
+        if(field === 'sec') document.getElementById('lblPrintSection').textContent = val || "-";
+        if(field === 'guide') {
+            document.getElementById('lblPrintGuide').textContent = val || "-";
+            document.querySelector('.lbl-guide-name').textContent = val || "-";
+        }
+        if(field === 'manager') {
+            document.querySelectorAll('.lbl-manager-name').forEach(el => el.textContent = val || "-");
+        }
+
+        updateGlobalSelectorLabels();
+        triggerAutosave();
+        updateMonthlyReportView();
+    }
+
+    function addNewClassProfile() {
+        const cName = prompt("أدخل اسم الصف الجديد:");
+        if(!cName) return;
+        const sName = prompt("أدخل اسم الشعبة:");
+        if(!sName) return;
+        
+        const newId = 'cls_' + Date.now();
+        appState.classes[newId] = {
+            meta: { school: "", cls: cName, sec: sName, guide: "", manager: "", currentYear: document.getElementById('yearSelector').value },
+            currentCount: 1,
+            studentRecords: {},
+            attendance: {}, lockedDays: {}, holidayDays: {}
+        };
+        for(let i=1; i<=1; i++) {
+            appState.classes[newId].studentRecords[i] = {qayd:"", name:"", birth:""};
+        }
+        
+        appState.activeClassId = newId;
+        buildAcademicYearDates(appState.classes[newId].meta.currentYear);
+        initDataStructures(newId, appState.classes[newId].meta.currentYear);
+        
+        updateGlobalSelectorLabels();
+        loadCurrentClassUI();
+        triggerAutosave();
+    }
+
+    // ==================== ترحيل الصف والشعبة بالكامل إلى صف/شعبة أخرى ====================
+    function openClassTransferModal() {
+        const activeCls = appState.classes[appState.activeClassId];
+        const otherClassIds = Object.keys(appState.classes).filter(id => id !== appState.activeClassId);
+
+        if (otherClassIds.length === 0) {
+            alert("❌ لا يوجد صف أو شعبة أخرى لترحيل الصف الحالي إليها. الرجاء إضافة صف جديد أولاً من زر (➕ إضافة صف/شعبة جديدة).");
+            return;
+        }
+
+        const sourceLabel = `${activeCls.meta.cls || 'بدون اسم'} / (${activeCls.meta.sec || '-'})`;
+        document.getElementById('classTransferSourceLbl').textContent = sourceLabel;
+
+        const select = document.getElementById('classTransferTargetSelect');
+        select.innerHTML = otherClassIds.map(id => {
+            const m = appState.classes[id].meta;
+            const label = `${m.cls || 'بدون اسم'} / (${m.sec || '-'})${m.school ? ' - ' + m.school : ''}`;
+            return `<option value="${id}">${label}</option>`;
+        }).join('');
+
+        document.getElementById('classTransferModalOverlay').style.display = 'flex';
+    }
+
+    function closeClassTransferModal() {
+        document.getElementById('classTransferModalOverlay').style.display = 'none';
+    }
+
+    function confirmClassTransfer() {
+        const targetClassId = document.getElementById('classTransferTargetSelect').value;
+        if (!targetClassId || !appState.classes[targetClassId]) { closeClassTransferModal(); return; }
+
+        const sourceClassId = appState.activeClassId;
+        const sourceCls = appState.classes[sourceClassId];
+        const targetCls = appState.classes[targetClassId];
+        const sourceLabel = `${sourceCls.meta.cls || 'بدون اسم'} / (${sourceCls.meta.sec || '-'})`;
+        const targetLabel = `${targetCls.meta.cls || 'بدون اسم'} / (${targetCls.meta.sec || '-'})`;
+        const studentCount = sourceCls.currentCount;
+
+        if (!confirm(`⚠️ هل تريد ترحيل جميع تلاميذ الصف [ ${sourceLabel} ] (${studentCount} تلميذ) إلى الصف [ ${targetLabel} ]؟\nسيتم نقل جميع بياناتهم وسجلات غياباتهم، وستبقى [ ${sourceLabel} ] مدرجة وفارغة من البيانات لبدء تسجيل تلاميذ جدد فيها.`)) return;
+
+        // نقل كل تلميذ من الصف المصدر إلى الصف الهدف مع سجل غياباته
+        for (let i = 1; i <= sourceCls.currentCount; i++) {
+            const rec = sourceCls.studentRecords[i] || { qayd: "", name: "", birth: "" };
+            const newId = targetCls.currentCount + 1;
+            targetCls.studentRecords[newId] = { qayd: rec.qayd || "", name: rec.name || "", birth: rec.birth || "" };
+            targetCls.currentCount = newId;
+
+            Object.keys(sourceCls.attendance).forEach(mKey => {
+                const sourceMonthData = sourceCls.attendance[mKey];
+                if (!targetCls.attendance[mKey]) targetCls.attendance[mKey] = {};
+                for (let dIdx = 0; dIdx < 35; dIdx++) {
+                    const sourceKey = `${i}_${dIdx}`;
+                    if (sourceMonthData.hasOwnProperty(sourceKey)) {
+                        targetCls.attendance[mKey][`${newId}_${dIdx}`] = sourceMonthData[sourceKey];
+                    }
+                }
+            });
+        }
+
+        // تفريغ الصف المصدر من بياناته بعد ترحيل جميع تلاميذه، مع الإبقاء عليه مدرجاً وجاهزاً لتلاميذ جدد
+        sourceCls.currentCount = 1;
+        sourceCls.studentRecords = { 1: { qayd: '', name: '', birth: '' } };
+        sourceCls.attendance = {}; sourceCls.lockedDays = {}; sourceCls.holidayDays = {};
+        initDataStructures(sourceClassId, sourceCls.meta.currentYear);
+
+        appState.activeClassId = targetClassId;
+
+        closeClassTransferModal();
+        updateGlobalSelectorLabels();
+        loadCurrentClassUI();
+        triggerAutosave();
+        alert(`✅ تم ترحيل جميع تلاميذ [ ${sourceLabel} ] بنجاح إلى الصف [ ${targetLabel} ].`);
+    }
+
+    function deleteCurrentClassProfile() {
+        const keys = Object.keys(appState.classes);
+        if (keys.length <= 1) {
+            alert("❌ لا يمكن حذف هذا الصف. يجب أن يحتوي السجل على صف واحد على الأ حداقل!");
+            return;
+        }
+
+        const activeCls = appState.classes[appState.activeClassId];
+        const classNameShow = activeCls.meta.cls ? `${activeCls.meta.cls} - (${activeCls.meta.sec || '-'})` : "هذا الصف الحالي";
+        
+        if (confirm(`⚠️ هل أنتِ متأكدة من حذف [ ${classNameShow} ] نهائياً بجميع تلاميذه وغياباته؟ لا يمكن التراجع عن هذا الإجراء.`)) {
+            delete appState.classes[appState.activeClassId];
+            
+            const remainingKeys = Object.keys(appState.classes);
+            appState.activeClassId = remainingKeys[0];
+            
+            updateGlobalSelectorLabels();
+            loadCurrentClassUI();
+            triggerAutosave();
+            alert("🗑️ تم حذف الصف وتحديث القائمة بنجاح.");
+        }
+    }
+
+    function updateGlobalSelectorLabels() {
+        const sel = document.getElementById('globalClassSelector');
+        const currentSelectedId = appState.activeClassId;
+        sel.innerHTML = '';
+        Object.keys(appState.classes).forEach(id => {
+            const m = appState.classes[id].meta;
+            const classNameShow = m.cls ? `${m.cls} - شعبة (${m.sec || '-'})` : "صف غير مسمى";
+            sel.innerHTML += `<option value="${id}">${classNameShow}</option>`;
+        });
+        sel.value = currentSelectedId;
+    }
+
+    function switchGlobalClass() {
+        appState.activeClassId = document.getElementById('globalClassSelector').value;
+        loadCurrentClassUI();
+        triggerAutosave();
+    }
+
+    function loadCurrentClassUI() {
+        const activeCls = appState.classes[appState.activeClassId];
+        if(!activeCls.meta.currentYear) activeCls.meta.currentYear = "2026_2027";
+        
+        const yearOptions = Array.from(document.getElementById('yearSelector').options).map(o => o.value);
+        if(!yearOptions.includes(activeCls.meta.currentYear)){
+            activeCls.meta.currentYear = "2026_2027";
+        }
+        
+        document.getElementById('yearSelector').value = activeCls.meta.currentYear;
+        
+        document.getElementById('schoolInput').value = activeCls.meta.school || "";
+        document.getElementById('classInput').value = activeCls.meta.cls || "";
+        document.getElementById('sectionInput').value = activeCls.meta.sec || "";
+        document.getElementById('guideInput').value = activeCls.meta.guide || "";
+        document.getElementById('managerInput').value = activeCls.meta.manager || "";
+        
+        document.getElementById('lblPrintSchool').textContent = activeCls.meta.school || "-";
+        document.getElementById('reportBoxSchoolLabel').textContent = "المدرسة: " + (activeCls.meta.school || "-");
+        document.getElementById('lblPrintClass').textContent = activeCls.meta.cls || "-";
+        document.getElementById('lblPrintSection').textContent = activeCls.meta.sec || "-";
+        document.getElementById('lblPrintGuide').textContent = activeCls.meta.guide || "-";
+        document.querySelector('.lbl-guide-name').textContent = activeCls.meta.guide || "-";
+        document.querySelectorAll('.lbl-manager-name').forEach(el => el.textContent = activeCls.meta.manager || "-");
+        
+        renderTableRows();
+        switchActiveAcademicYear();
+    }
+
+    function clearActiveProfileData() {
+        const activeCls = appState.classes[appState.activeClassId];
+        if (confirm("⚠️ هل أنتِ متأكدة من رغبتكِ في حذف ومسح كافة البيانات لهذا الصف الحالي؟")) {
+            activeCls.currentCount = 1; 
+            activeCls.studentRecords = {};
+            for(let i=1; i<=1; i++) activeCls.studentRecords[i] = { qayd: '', name: '', birth: '' };
+            activeCls.attendance = {}; activeCls.lockedDays = {}; activeCls.holidayDays = {};
+            buildAcademicYearDates(activeCls.meta.currentYear);
+            initDataStructures(appState.activeClassId, activeCls.meta.currentYear);
+            renderTableRows();
+            switchActiveMonthView();
+            triggerAutosave();
+            alert("✅ تم مسح السجل وتفريغ البيانات بنجاح.");
+        }
+    }
+
+    function renderTableRows() {
+        const tbody = document.getElementById('studentTableBody');
+        let tbodyHtml = '';
+        const activeCls = appState.classes[appState.activeClassId];
+        
+        for(let i = 1; i <= activeCls.currentCount; i++) {
+            if (!activeCls.studentRecords[i]) activeCls.studentRecords[i] = { qayd: '', name: '', birth: '' };
+            const rec = activeCls.studentRecords[i];
+            
+            tbodyHtml += `<tr data-row="${i}">
+                <td class="sticky-column" style="right: 0; font-weight:bold; background-color:#f1f5f9;">${i}</td>
+                <td class="sticky-column" style="right: 35px; padding:0;"><input type="text" class="input-cell" id="qayd-${i}" oninput="syncStudentInfo(${i}, 'qayd')" value="${rec.qayd || ''}"></td>
+                <td class="sticky-column" style="right: 100px; padding:0;"><input type="text" class="input-cell" style="text-align:right; padding-right:8px;" id="name-${i}" oninput="syncStudentInfo(${i}, 'name')" value="${rec.name || ''}" placeholder="اسم التلميذ..."></td>
+                <td class="sticky-column" style="right: 245px; padding:0;"><input type="text" class="input-cell" id="birth-${i}" oninput="syncStudentInfo(${i}, 'birth')" value="${rec.birth || ''}" placeholder="السنة"></td>
+                <td class="total-absent" id="total-abs-container-${i}">
+                    <span id="total-abs-num-${i}">0</span>
+                    <span id="total-abs-badge-${i}" class="badge" style="display:none;"></span>
+                </td>
+                <td class="total-leave" id="total-leave-container-${i}"><span id="total-leave-num-${i}">0</span></td>
+                <td class="delete-cell" style="white-space:nowrap;">
+                    <button type="button" class="btn-transfer-student" onclick="openTransferModal(${i})" title="ترحيل التلميذ إلى صف آخر">🔀 ترحيل</button>
+                    <button type="button" class="btn-delete-student" onclick="deleteStudentRow(${i})" title="حذف التلميذ">🗑️ حذف</button>
+                </td>
+            </tr>`;
+        }
+        tbody.innerHTML = tbodyHtml;
+    }
+
+    function sortStudentsAlphabetically() {
+        const activeCls = appState.classes[appState.activeClassId];
+        if (activeCls.currentCount <= 1) return;
+
+        let studentsList = [];
+        for (let i = 1; i <= activeCls.currentCount; i++) {
+            let rec = activeCls.studentRecords[i] || { qayd: "", name: "", birth: "" };
+            studentsList.push({ oldId: i, qayd: rec.qayd, name: rec.name || "", birth: rec.birth });
+        }
+
+        studentsList.sort((a, b) => {
+            if (!a.name.trim()) return 1; if (!b.name.trim()) return -1;
+            return a.name.localeCompare(b.name, 'ar', { sensitivity: 'base' });
+        });
+
+        let newAttendance = {};
+        Object.keys(activeCls.attendance).forEach(mKey => { newAttendance[mKey] = {}; });
+        let newStudentRecords = {};
+
+        studentsList.forEach((student, newIdx) => {
+            const newId = newIdx + 1;
+            newStudentRecords[newId] = { qayd: student.qayd, name: student.name, birth: student.birth };
+
+            Object.keys(activeCls.attendance).forEach(mKey => {
+                const oldMonthData = activeCls.attendance[mKey];
+                for (let dIdx = 0; dIdx < 35; dIdx++) {
+                    const oldKeyCombo = `${student.oldId}_${dIdx}`;
+                    const newKeyCombo = `${newId}_${dIdx}`;
+                    if (oldMonthData.hasOwnProperty(oldKeyCombo)) {
+                        newAttendance[mKey][newKeyCombo] = oldMonthData[oldKeyCombo];
+                    }
+                }
+            });
+        });
+
+        activeCls.studentRecords = newStudentRecords;
+        activeCls.attendance = newAttendance;
+        renderTableRows();
+        switchActiveMonthView();
+        triggerAutosave();
+        alert("🔀 تم فرز أسماء التلاميذ أبجدياً بنجاح!");
+    }
+
+    // إزالة تلميذ من صف معيّن مع إزاحة بقية الصفوف وإصلاح بيانات الغياب (دالة مساعدة داخلية بدون تأكيد أو حفظ)
+    function removeStudentRowInternal(cls, rowId) {
+        for (let i = rowId; i < cls.currentCount; i++) {
+            cls.studentRecords[i] = { ...cls.studentRecords[i + 1] };
+        }
+        delete cls.studentRecords[cls.currentCount];
+
+        Object.keys(cls.attendance).forEach(mKey => {
+            const monthData = cls.attendance[mKey];
+            for (let i = rowId; i < cls.currentCount; i++) {
+                for (let dIdx = 0; dIdx < 35; dIdx++) {
+                    const currentKey = `${i}_${dIdx}`;
+                    const nextKey = `${i+1}_${dIdx}`;
+                    if (monthData.hasOwnProperty(nextKey)) monthData[currentKey] = monthData[nextKey];
+                    else delete monthData[currentKey];
+                }
+            }
+            delete monthData[`${cls.currentCount}_${34}`];
+        });
+
+        cls.currentCount--;
+    }
+
+    function deleteStudentRow(rowId) {
+        const activeCls = appState.classes[appState.activeClassId];
+        const studentName = (activeCls.studentRecords[rowId] && activeCls.studentRecords[rowId].name) ? activeCls.studentRecords[rowId].name : ("التلميذ ت (" + rowId + ")");
+        
+        if (confirm(`⚠️ هل أنت متأكد من حذف التلميذ (${studentName})؟`)) {
+            removeStudentRowInternal(activeCls, rowId);
+            renderTableRows();
+            switchActiveMonthView();
+            triggerAutosave();
+        }
+    }
+
+    // ==================== ترحيل التلميذ إلى صف/شعبة أخرى ====================
+    let pendingTransferRowId = null;
+
+    function openTransferModal(rowId) {
+        const activeCls = appState.classes[appState.activeClassId];
+        const otherClassIds = Object.keys(appState.classes).filter(id => id !== appState.activeClassId);
+
+        if (otherClassIds.length === 0) {
+            alert("❌ لا يوجد صف أو شعبة أخرى لترحيل التلميذ إليها. الرجاء إضافة صف جديد أولاً من زر (➕ إضافة صف/شعبة جديدة).");
+            return;
+        }
+
+        const rec = activeCls.studentRecords[rowId] || { name: "" };
+        pendingTransferRowId = rowId;
+
+        document.getElementById('transferStudentNameLbl').textContent = rec.name && rec.name.trim() ? rec.name : `التلميذ ت (${rowId})`;
+
+        const select = document.getElementById('transferTargetClassSelect');
+        select.innerHTML = otherClassIds.map(id => {
+            const m = appState.classes[id].meta;
+            const label = `${m.cls || 'بدون اسم'} / (${m.sec || '-'})${m.school ? ' - ' + m.school : ''}`;
+            return `<option value="${id}">${label}</option>`;
+        }).join('');
+
+        document.getElementById('transferModalOverlay').style.display = 'flex';
+    }
+
+    function closeTransferModal() {
+        pendingTransferRowId = null;
+        document.getElementById('transferModalOverlay').style.display = 'none';
+    }
+
+    function confirmStudentTransfer() {
+        if (pendingTransferRowId === null) return;
+        const rowId = pendingTransferRowId;
+        const targetClassId = document.getElementById('transferTargetClassSelect').value;
+        if (!targetClassId || !appState.classes[targetClassId]) { closeTransferModal(); return; }
+
+        const sourceCls = appState.classes[appState.activeClassId];
+        const targetCls = appState.classes[targetClassId];
+        const rec = sourceCls.studentRecords[rowId] || { qayd: "", name: "", birth: "" };
+        const studentName = rec.name && rec.name.trim() ? rec.name : `التلميذ ت (${rowId})`;
+        const targetLabel = `${targetCls.meta.cls || 'بدون اسم'} / (${targetCls.meta.sec || '-'})`;
+
+        if (!confirm(`⚠️ هل تريد ترحيل التلميذ (${studentName}) إلى الصف [ ${targetLabel} ]؟\nسيتم نقل بياناته وسجل غياباته، وحذفه من الصف الحالي.`)) return;
+
+        // 1. إضافة التلميذ كسجل جديد في الصف الهدف
+        const newId = targetCls.currentCount + 1;
+        targetCls.studentRecords[newId] = { qayd: rec.qayd || "", name: rec.name || "", birth: rec.birth || "" };
+        targetCls.currentCount = newId;
+
+        // 2. نقل بيانات الغياب/الإجازات لجميع الأشهر المتوفرة لدى الصف المصدر
+        Object.keys(sourceCls.attendance).forEach(mKey => {
+            const sourceMonthData = sourceCls.attendance[mKey];
+            if (!targetCls.attendance[mKey]) targetCls.attendance[mKey] = {};
+            for (let dIdx = 0; dIdx < 35; dIdx++) {
+                const sourceKey = `${rowId}_${dIdx}`;
+                if (sourceMonthData.hasOwnProperty(sourceKey)) {
+                    targetCls.attendance[mKey][`${newId}_${dIdx}`] = sourceMonthData[sourceKey];
+                }
+            }
+        });
+
+        // 3. حذف التلميذ من الصف الحالي مع إزاحة بقية الصفوف
+        removeStudentRowInternal(sourceCls, rowId);
+
+        closeTransferModal();
+        renderTableRows();
+        switchActiveMonthView();
+        triggerAutosave();
+        alert(`✅ تم ترحيل التلميذ (${studentName}) بنجاح إلى الصف [ ${targetLabel} ].`);
+    }
+
+    function syncStudentInfo(rowId, field) {
+        appState.classes[appState.activeClassId].studentRecords[rowId][field] = document.getElementById(`${field}-${rowId}`).value;
+        triggerAutosave();
+        if(field === 'name') updateMonthlyReportView();
+    }
+
+    function switchActiveMonthView() {
+        const mSelector = document.getElementById('monthSelector');
+        const mKey = mSelector.value;
+        if(!mKey) return;
+        
+        const monthText = mSelector.options[mSelector.selectedIndex].text;
+        const currentMonthDays = monthlyDatesConfig[mKey] || [];
+        const activeCls = appState.classes[appState.activeClassId];
+        
+        document.getElementById('lblPrintMonth').textContent = monthText;
+        document.getElementById('dynamicMonthHdrLabel').setAttribute('colspan', currentMonthDays.length);
+        
+        let daysHtml = '';
+        currentMonthDays.forEach((dateStr, dIdx) => {
+            const dateNum = parseInt(dateStr.split('-')[2], 10);
+            const isHoliday = activeCls.holidayDays[mKey] && activeCls.holidayDays[mKey].includes(dIdx);
+            
+            if (isHoliday) {
+                daysHtml += `<th id="hdr-col-${dIdx}" class="holiday-locked-hdr col-day-cell">
+                    <div class="lock-hdr-wrapper"><span style="font-size:11px; font-weight:bold;">${dateNum}</span><span style="font-size:9px; color:#fef9c3; font-weight:bold;">ع</span><button class="btn-day-unlock" onclick="cancelEntireDayHoliday(${dIdx})">🔓</button></div></th>`;
+            } else {
+                daysHtml += `<th id="hdr-col-${dIdx}" class="col-day-cell">
+                    <div class="lock-hdr-wrapper"><span style="font-size:11px; font-weight:bold;">${dateNum}</span><button class="btn-day-lock" id="lock-btn-${dIdx}" onclick="lockDayFlow(${dIdx})">تم</button><button class="btn-day-unlock" id="unlock-btn-${dIdx}" style="display:none;" onclick="unlockDayFlow(${dIdx})">تعديل</button><button class="btn-all-holiday" id="holiday-btn-${dIdx}" onclick="setEntireDayAsHoliday(${dIdx})">ع</button></div></th>`;
+            }
+        });
+        document.getElementById('secondaryDaysRow').innerHTML = daysHtml;
+
+        for(let rId = 1; rId <= activeCls.currentCount; rId++) {
+            const tr = document.querySelector(`tr[data-row="${rId}"]`);
+            if(!tr) continue;
+            tr.querySelectorAll('td[data-col-day]').forEach(c => c.remove());
+            
+            let cellsChunk = '';
+            currentMonthDays.forEach((dateStr, dIdx) => {
+                const keyCombo = `${rId}_${dIdx}`;
+                let currentVal = activeCls.attendance[mKey][keyCombo] || "ح";
+                activeCls.attendance[mKey][keyCombo] = currentVal;
+
+                let clsColor = 'status-present';
+                let cellInner = `<select class="attendance-select" onchange="attendanceSelectChanged(this, ${rId}, ${dIdx})">
+                        <option value="ح" ${currentVal==='ح'?'selected':''}>ح</option>
+                        <option value="غ" ${currentVal==='غ'?'selected':''}>غ</option>
+                        <option value="م" ${currentVal==='م'?'selected':''}>م</option>
+                    </select>`;
+
+                if(currentVal === 'غ') clsColor = 'status-absent';
+                else if(currentVal === 'م') clsColor = 'status-leave';
+                else if(currentVal === 'ع') {
+                    clsColor = 'status-holiday locked-cell';
+                    cellInner = `<span style="font-weight:bold; font-size:11px; color:#a16207;">ع</span>`;
+                }
+
+                cellsChunk += `<td data-col-day="${dIdx}" id="cell-${rId}-${dIdx}" class="${clsColor} col-day-cell">${cellInner}</td>`;
+            });
+            tr.insertAdjacentHTML('beforeend', cellsChunk);
+        }
+
+        for(let i=1; i<=activeCls.currentCount; i++) calculateRowStats(i);
+        
+        const monthLocks = activeCls.lockedDays[mKey] || [];
+        monthLocks.forEach(dIdx => {
+            if (!activeCls.holidayDays[mKey].includes(dIdx)) enforceVisualLockOnColumn(dIdx);
+        });
+
+        updateMonthlyReportView();
+    }
+
+    function attendanceSelectChanged(sel, rId, dIdx) {
+        const mKey = document.getElementById('monthSelector').value;
+        appState.classes[appState.activeClassId].attendance[mKey][`${rId}_${dIdx}`] = sel.value;
+        calculateRowStats(rId);
+        switchActiveMonthView();
+        triggerAutosave();
+    }
+
+    function setEntireDayAsHoliday(dIdx) {
+        const mKey = document.getElementById('monthSelector').value;
+        const activeCls = appState.classes[appState.activeClassId];
+        if(confirm("🛠️ تحويل هذا اليوم لجميع التلاميذ إلى عطلة رسمية؟")) {
+            if (!activeCls.holidayDays[mKey]) activeCls.holidayDays[mKey] = [];
+            activeCls.holidayDays[mKey].push(dIdx);
+            for(let rId = 1; rId <= activeCls.currentCount; rId++) activeCls.attendance[mKey][`${rId}_${dIdx}`] = "ع";
+            switchActiveMonthView(); triggerAutosave();
+        }
+    }
+
+    function cancelEntireDayHoliday(dayIdx) {
+        const mKey = document.getElementById('monthSelector').value;
+        const activeCls = appState.classes[appState.activeClassId];
+        if (confirm("🔓 إلغاء العطلة الرسمية؟")) {
+            activeCls.holidayDays[mKey] = activeCls.holidayDays[mKey].filter(item => item !== dayIdx);
+            for (let rId = 1; rId <= activeCls.currentCount; rId++) activeCls.attendance[mKey][`${rId}_${dayIdx}`] = "ح";
+            switchActiveMonthView(); triggerAutosave();
+        }
+    }
+
+    function calculateRowStats(rowId) {
+        const activeCls = appState.classes[appState.activeClassId];
+        let totalAbsent = 0, totalLeave = 0;
+        
+        Object.keys(activeCls.attendance).forEach(m => {
+            const mData = activeCls.attendance[m];
+            Object.keys(mData).forEach(k => {
+                if(k.indexOf(rowId + "_") === 0) {
+                    if (mData[k] === 'غ') totalAbsent++;
+                    if (mData[k] === 'م') totalLeave++;
+                }
+            });
+        });
+        
+        document.getElementById(`total-abs-num-${rowId}`).textContent = totalAbsent;
+        document.getElementById(`total-leave-num-${rowId}`).textContent = totalLeave;
+        
+        const badgeEl = document.getElementById(`total-abs-badge-${rowId}`);
+        badgeEl.style.display = 'none';
+        if (totalAbsent >= 50) { badgeEl.textContent = 'مفصول'; badgeEl.className = 'badge warn-expelled'; badgeEl.style.display = 'block'; }
+        else if (totalAbsent >= 45) { badgeEl.textContent = 'إنذار أخير'; badgeEl.className = 'badge warn-3'; badgeEl.style.display = 'block'; }
+        else if (totalAbsent >= 30) { badgeEl.textContent = 'إنذار ثان'; badgeEl.className = 'badge warn-2'; badgeEl.style.display = 'block'; }
+        else if (totalAbsent >= 15) { badgeEl.textContent = 'إنذار أول'; badgeEl.className = 'badge warn-1'; badgeEl.style.display = 'block'; }
+    }
+
+    function addNewStudentRowClick() {
+        appState.classes[appState.activeClassId].currentCount++;
+        renderTableRows(); switchActiveMonthView(); triggerAutosave();
+    }
+
+    function lockDayFlow(dayIdx) {
+        const mKey = document.getElementById('monthSelector').value;
+        const activeCls = appState.classes[appState.activeClassId];
+        if (!appState.pin) {
+            const userNewPin = prompt("🔑 تعيين رمز القفل السري الموحد:");
+            if (!userNewPin) return;
+            appState.pin = userNewPin.trim();
+        }
+        enforceVisualLockOnColumn(dayIdx);
+        if (!activeCls.lockedDays[mKey].includes(dayIdx)) activeCls.lockedDays[mKey].push(dayIdx);
+        triggerAutosave();
+    }
+
+    function enforceVisualLockOnColumn(dayIdx) {
+        const headerCell = document.getElementById(`hdr-col-${dayIdx}`);
+        if (headerCell) headerCell.classList.add('locked-column-hdr');
+        if(document.getElementById('lock-btn-' + dayIdx)) document.getElementById('lock-btn-' + dayIdx).style.display = 'none';
+        if(document.getElementById('holiday-btn-' + dayIdx)) document.getElementById('holiday-btn-' + dayIdx).style.display = 'none';
+        if(document.getElementById('unlock-btn-' + dayIdx)) document.getElementById('unlock-btn-' + dayIdx).style.display = 'inline-block';
+        
+        for (let i = 1; i <= appState.classes[appState.activeClassId].currentCount; i++) {
+            const cell = document.getElementById(`cell-${i}-${dayIdx}`);
+            if (cell) {
+                cell.classList.add('locked-cell');
+                if (cell.querySelector('select')) cell.querySelector('select').disabled = true;
+            }
+        }
+    }
+
+    function unlockDayFlow(dayIdx) {
+        const mKey = document.getElementById('monthSelector').value;
+        if (prompt("🔑 الرمز السري للتعديل:") === appState.pin) {
+            removeVisualLockFromColumn(dayIdx);
+            appState.classes[appState.activeClassId].lockedDays[mKey] = appState.classes[appState.activeClassId].lockedDays[mKey].filter(item => item !== dayIdx);
+            triggerAutosave();
+        } else { alert("❌ الرمز خاطئ!"); }
+    }
+
+    function removeVisualLockFromColumn(dayIdx) {
+        const headerCell = document.getElementById(`hdr-col-${dayIdx}`);
+        if (headerCell) headerCell.classList.remove('locked-column-hdr');
+        document.getElementById(`lock-btn-${dayIdx}`).style.display = 'inline-block';
+        document.getElementById(`holiday-btn-${dayIdx}`).style.display = 'inline-block';
+        document.getElementById(`unlock-btn-${dayIdx}`).style.display = 'none';
+        
+        for (let i = 1; i <= appState.classes[appState.activeClassId].currentCount; i++) {
+            const cell = document.getElementById(`cell-${i}-${dayIdx}`);
+            if (cell) {
+                cell.classList.remove('locked-cell');
+                if (cell.querySelector('select')) cell.querySelector('select').disabled = false;
+            }
+        }
+    }
+
+    function openExcelImportDialog() {
+        const rawData = prompt("📋 الصقي الأعمدة الثلاثة المنسوخة من إكسل هنا:");
+        if (!rawData) return;
+        const rows = rawData.split('\n');
+        const activeCls = appState.classes[appState.activeClassId];
+        let importedCount = 0, newRecords = {};
+        
+        rows.forEach((rowText) => {
+            if(!rowText.trim()) return;
+            const columns = rowText.split('\t');
+            if (columns.length >= 2 && columns[1].trim() !== "") {
+                importedCount++;
+                newRecords[importedCount] = { qayd: columns[0]?columns[0].trim():"", name: columns[1]?columns[1].trim():"", birth: columns[2]?columns[2].trim():"" };
+            }
+        });
+        
+        if (importedCount > 0) {
+            activeCls.studentRecords = newRecords;
+            activeCls.currentCount = importedCount;
+            renderTableRows(); switchActiveMonthView(); triggerAutosave();
+            alert(`✅ تم استيراد (${importedCount}) تلميذ بنجاح.`);
+        }
+    }
+
+    function executeGlobalSearch() {
+        const query = document.getElementById('globalSearchInput').value.trim();
+        const resultsContainer = document.getElementById('searchResultsContainer');
+        const searchBox = document.getElementById('searchResultsBox');
+        if (!query) { searchBox.style.display = 'none'; return; }
+        
+        let htmlResults = '', matchCount = 0;
+        Object.keys(appState.classes).forEach(clsId => {
+            const currentClassObj = appState.classes[clsId];
+            for (let i = 1; i <= currentClassObj.currentCount; i++) {
+                const rec = currentClassObj.studentRecords[i];
+                if (!rec) continue;
+                if ((rec.name && rec.name.toLowerCase().includes(query.toLowerCase())) || (rec.qayd && rec.qayd.toString().includes(query))) {
+                    matchCount++;
+                    let parsedAbsenceDates = [], totalSearchLeave = 0;
+                    
+                    Object.keys(currentClassObj.attendance).forEach(mKey => {
+                        const monthData = currentClassObj.attendance[mKey];
+                        const dateStringsList = monthlyDatesConfig[mKey] || [];
+                        Object.keys(monthData).forEach(cellComboKey => {
+                            if (cellComboKey.indexOf(i + "_") === 0) {
+                                if (monthData[cellComboKey] === 'غ') {
+                                    const dIdx = parseInt(cellComboKey.split('_')[1]);
+                                    if (dateStringsList[dIdx]) parsedAbsenceDates.push(`${dateStringsList[dIdx].split('-')[2]}/${dateStringsList[dIdx].split('-')[1]}`);
+                                }
+                                if (monthData[cellComboKey] === 'م') totalSearchLeave++;
+                            }
+                        });
+                    });
+                    
+                    htmlResults += `<tr><td>${matchCount}</td><td>${rec.qayd || '-'}</td><td style="text-align:right; font-weight:bold; color:#1e3a8a;">${rec.name}</td><td>${currentClassObj.meta.cls || '-'} / (${currentClassObj.meta.sec || '-'})</td><td>${currentClassObj.meta.guide || '-'}</td><td style="color:red; font-weight:bold;">${parsedAbsenceDates.length} أيام</td><td style="color:orange; font-weight:bold;">${totalSearchLeave} أيام</td><td style="text-align:right;">${parsedAbsenceDates.join(' ، ') || 'لا غيابات'}</td></tr>`;
+                }
+            }
+        });
+        
+        resultsContainer.innerHTML = matchCount === 0 ? '<div class="report-no-data">❌ لم يتم العثور على نتائج.</div>' : `<table class="report-table"><thead><tr><th>ت</th><th>رقم القيد</th><th>اسم التلميذ</th><th>الصف</th><th>المرشد</th><th>الغياب</th><th>الإجازات</th><th>التواريخ</th></tr></thead><tbody>${htmlResults}</tbody></table>`;
+        searchBox.style.display = 'block';
+    }
+
+    function updateMonthlyReportView() {
+        const mSelector = document.getElementById('monthSelector');
+        const mKey = mSelector.value;
+        if(!mKey) return;
+        
+        const currentMonthDays = monthlyDatesConfig[mKey] || [];
+        const container = document.getElementById('reportTableContainer');
+        const activeCls = appState.classes[appState.activeClassId];
+        let studentSummaryList = [];
+        
+        for(let rId = 1; rId <= activeCls.currentCount; rId++) {
+            const rec = activeCls.studentRecords[rId];
+            if (!rec || !rec.name) continue;
+            let absCount = 0, leaveCount = 0, absDates = [];
+            
+            currentMonthDays.forEach((dateStr, dIdx) => {
+                const status = activeCls.attendance[mKey][`${rId}_${dIdx}`];
+                if (status === 'غ') { absCount++; absDates.push(`${dateStr.split('-')[2]}/${dateStr.split('-')[1]}`); }
+                if (status === 'م') leaveCount++;
+            });
+            
+            if (absCount > 0) studentSummaryList.push({ qayd: rec.qayd || '-', name: rec.name, absentDays: absCount, leaveDays: leaveCount, datesStr: absDates.join(' ، ') });
+        }
+        
+        if (studentSummaryList.length === 0) { container.innerHTML = `<div class="report-no-data">✅ لا يوجد تلاميذ غائبين في هذا الشهر.</div>`; return; }
+        
+        let html = `<table class="report-table"><thead><tr><th>ت</th><th>رقم القيد</th><th>اسم التلميذ</th><th>الغياب</th><th>الإجازات</th><th>التواريخ تفصيلاً</th><th>الحالة</th></tr></thead><tbody>`;
+        studentSummaryList.forEach((st, idx) => {
+            html += `<tr><td>${idx + 1}</td><td>${st.qayd}</td><td style="text-align:right;">${st.name}</td><td>${st.absentDays} يوم</td><td>${st.leaveDays} يوم</td><td style="text-align:right; color:red;">${st.datesStr}</td><td>${st.absentDays>=15?'إنذار':'مستقر'}</td></tr>`;
+        });
+        container.innerHTML = html + `</tbody></table>`;
+    }
+
+    function printMonthlyReport() {
+        document.body.classList.add('print-only-report');
+        window.print();
+        setTimeout(() => { document.body.classList.remove('print-only-report'); }, 500);
+    }
+
+    function exportDatabase() {
+        const blob = new Blob([JSON.stringify(appState)], {type: "application/json"});
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", `نسخة_سجل_الغياب.json`); link.click();
+    }
+
+    function importDatabase(event) {
+        const file = event.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if(imported && imported.classes) { appState = imported; safeStorage.setItem('attendance_app_state', JSON.stringify(appState)); window.location.reload(); }
+            } catch(err) { alert("❌ خطأ بالملف"); }
+        };
+        reader.readAsText(file);
+    }
+
+    function triggerAutosave() {
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(() => { safeStorage.setItem('attendance_app_state', JSON.stringify(appState)); }, 800); 
+    }
+
+    function initializeApplication() {
+        const saved = safeStorage.getItem('attendance_app_state');
+        if (saved) { try { let parsed = JSON.parse(saved); if(parsed.classes) appState = parsed; } catch(e){} }
+        updateGlobalSelectorLabels();
+        loadCurrentClassUI();
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initializeApplication);
+    else initializeApplication();
+</script>
+</body>
+</html>

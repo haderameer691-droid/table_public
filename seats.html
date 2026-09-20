@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>نظام خرائط الجلوس الامتحانية / الإصدار الفخم المعتمد</title>
+    <!-- استدعاء خط Cairo الفخم للترويسات والتذييل -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9; margin: 20px; color: #333;
+        }
+        h1.main-title { text-align: center; color: #2c3e50; margin-bottom: 25px; font-family: 'Cairo', sans-serif; font-weight: 800; }
+        .container {
+            max-width: 1100px; margin: 0 auto; background: #fff;
+            padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .setup-section {
+            display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px;
+            margin-bottom: 25px; background: #f8f9fa; padding: 20px;
+            border-radius: 6px; border: 1px solid #e2e8f0;
+        }
+        .form-group { margin-bottom: 12px; }
+        label { font-weight: bold; display: block; margin-bottom: 6px; font-size: 14px; }
+        textarea, input, select {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e1;
+            border-radius: 4px; box-sizing: border-box; font-size: 14px; background: #fff;
+        }
+        textarea { height: 130px; resize: vertical; }
+        .controls { text-align: center; margin-bottom: 30px; background: #ebf3f9; padding: 15px; border-radius: 6px; }
+        
+        button {
+            padding: 12px 24px; font-size: 15px; font-weight: bold;
+            border: none; border-radius: 5px; cursor: pointer; margin: 5px; transition: 0.2s;
+            font-family: 'Cairo', sans-serif;
+        }
+        .btn-primary { background-color: #3498db; color: white; }
+        .btn-primary:hover { background-color: #2980b9; }
+        .btn-success { background-color: #2ecc71; color: white; }
+        .btn-success:hover { background-color: #27ae60; }
+        .btn-info { background-color: #9b59b6; color: white; }
+        .btn-info:hover { background-color: #8e44ad; }
+        .btn-danger { background-color: #e74c3c; color: white; }
+        .btn-danger:hover { background-color: #c0392b; }
+        .btn-warning { background-color: #e67e22; color: white; }
+        .btn-warning:hover { background-color: #d35400; }
+        
+        .btn-sector-control {
+            background-color: #7f8c8d; color: white; padding: 4px 10px; 
+            font-size: 11px; border-radius: 3px; margin-right: 5px; font-weight: bold;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        .btn-sector-control:hover { background-color: #64748b; }
+        
+        /* --- ترويسة وتذييل فخم بخط Cairo --- */
+        .hall-header-table, .hall-header-table-sector, .hall-footer, .hall-footer-sector {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .hall-card {
+            background: white; border: 4px solid #000000; border-radius: 8px;
+            padding: 15px; margin-bottom: 50px; box-sizing: border-box;
+        }
+        
+        .hall-header-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+        .hall-header-table td { border: none !important; padding: 4px; vertical-align: top; background: none !important; }
+        
+        /* ضبط الأحجام ونوع الخط للتروية الرئيسية */
+        .header-right { text-align: right; font-weight: 800; font-size: 15px; width: 35%; line-height: 1.6; }
+        .header-center { text-align: center; font-weight: 900; font-size: 15px; width: 30%; line-height: 1.6; }
+        .header-left { text-align: right; font-weight: 800; font-size: 15px; width: 35%; line-height: 1.6; }
+
+        .sector-block { margin-bottom: 15px; }
+
+        .sector-header {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 15px; font-weight: bold; background-color: #2c3e50 !important; color: white !important;
+            padding: 6px 12px; border-radius: 4px; margin: 6px 0;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        
+        .sector-divider {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 15px; font-weight: bold; background-color: #16a085 !important; color: white !important;
+            padding: 6px 12px; border-radius: 4px; margin: 12px 0 6px 0;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        
+        .door-notice { font-size: 11px; background: #e67e22 !important; color: white !important; padding: 2px 6px; border-radius: 3px; margin-left: auto; margin-right: 10px; }
+
+        .seats-grid { display: grid; gap: 8px; margin-bottom: 5px; }
+        
+        .seat-box {
+            border: 3px solid #000000; border-radius: 6px; padding: 6px;
+            background-color: #fff; min-height: 75px; display: flex;
+            flex-direction: column; justify-content: space-between; position: relative;
+            box-sizing: border-box;
+        }
+        
+        .seat-number { 
+            font-size: 12px; font-weight: 900; color: #000000; 
+            border-bottom: 2px dashed #000000; padding-bottom: 3px; 
+            margin-bottom: 6px; text-align: center; 
+        }
+        
+        .double-student-container { display: flex; gap: 6px; flex-grow: 1; align-items: stretch; }
+        .student-slot {
+            flex: 1; padding: 6px 4px; background: #fff; border: 2px solid #000000; border-radius: 4px;
+            display: flex; flex-direction: column; justify-content: center; text-align: center;
+        }
+        
+        .single-student-container {
+            display: flex; flex-direction: column; justify-content: center; text-align: center; flex-grow: 1;
+            padding: 4px 0;
+        }
+
+        .student-name { font-size: 14px; font-weight: 900; color: #000000; line-height: 1.3; }
+        .student-grade { font-size: 12px; margin-top: 2px; }
+        
+        .grade-6 { color: #004085 !important; font-weight: 900; } 
+        .grade-5 { color: #155724 !important; font-weight: 900; } 
+        .grade-4 { color: #721c24 !important; font-weight: 900; } 
+        .grade-default { color: #4b6584 !important; font-weight: 900; }
+
+        .empty-slot { color: #7f8c8d; font-style: italic; font-size: 11px; font-weight: bold; }
+        .empty-seat-x {
+            color: #dc3545; font-size: 32px; font-weight: 900;
+            text-align: center; margin: auto; line-height: 1;
+            font-family: Arial, sans-serif; user-select: none;
+        }
+
+        /* تنسيقات التذييل الرئيسي وضبط توقيع المدير في الوسط */
+        .hall-footer { margin-top: 15px; display: flex; justify-content: space-between; align-items: flex-end; border-top: 3px solid #000; padding-top: 6px; }
+        .stats-boxes { display: flex; gap: 10px; font-family: 'Cairo', sans-serif; }
+        .stat-box { border: 2px solid #000; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #fff; }
+        .manager-sign { text-align: center; font-weight: 800; font-size: 14px; line-height: 1.6; min-width: 220px; }
+
+        /* ترويسة وتيع القطاعات المنفصلة */
+        .hall-header-table-sector { display: none; width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+        .hall-header-table-sector td { border: none !important; padding: 4px; vertical-align: top; background: none !important; }
+        
+        /* تعديل ترويسة يسار القطاع: محاذاة يمين وحذف العام الدراسي */
+        .hall-header-table-sector .header-left { text-align: right !important; font-weight: 800; font-size: 15px; width: 35%; line-height: 1.6; }
+        .hall-footer-sector { display: none; justify-content: space-between; align-items: flex-end; border-top: 3px solid #000; padding-top: 6px; }
+
+        /* ===== قصاصات طباعة أسماء التلاميذ (للصقها على المقاعد) ===== */
+        .slips-area { display: none; }
+        .slip-card {
+            border: 2px dashed #000000;
+            border-radius: 6px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 6px 4px;
+            font-family: 'Cairo', sans-serif;
+        }
+        .slip-student-name { font-size: 15px; font-weight: 900; color: #000000; line-height: 1.3; margin-bottom: 4px; }
+        .slip-student-grade { font-size: 12px; font-weight: 700; color: #333333; }
+
+        /* ================= إعدادات التوزيع المرن التلقائي الذكي للطباعة ================= */
+        @media print {
+            h1.main-title, .setup-section, .controls, .btn-sector-control, .door-notice { display: none !important; }
+            
+            body { background: white; margin: 0; padding: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; margin: 0; }
+            
+            /* الوضع الافتراضي: طباعة القاعات كاملة */
+            .hall-card { 
+                border: 4px solid #000000 !important; 
+                margin: 0 auto !important; 
+                padding: 10px !important; 
+                box-sizing: border-box !important; 
+                page-break-after: always !important;
+                height: 287mm !important; 
+                overflow: hidden !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important; 
+            }
+
+            .seat-number { display: none !important; }
+
+            .hall-header-table { display: table !important; margin-bottom: 5px !important; margin-top: 0 !important; width: 100% !important; }
+            .hall-header-table td { padding: 2px !important; font-size: 14px !important; }
+
+            .sector-block { 
+                margin-bottom: 0 !important; 
+                flex: 1 !important; 
+                display: flex !important; 
+                flex-direction: column !important; 
+                justify-content: space-between !important;
+                min-height: 0 !important; 
+            }
+            
+            .sector-header, .sector-divider { margin: 4px 0 !important; padding: 4px 10px !important; font-size: 14px !important; }
+            
+            .seats-grid { 
+                gap: 8px !important; 
+                margin-bottom: 4px !important; 
+                flex: 1 !important; 
+                align-content: stretch !important;
+                min-height: 0 !important;
+            }
+            
+            .seat-box { 
+                border: 3px solid #000000 !important; 
+                background: #fff !important; 
+                height: auto !important;
+                min-height: 0 !important; 
+                flex: 1 !important;
+                padding: 6px 4px !important;
+            }
+            
+            .student-slot { border: 2px solid #000000 !important; background: #fff !important; padding: 4px 2px !important; }
+            
+            .student-name { font-size: 15px !important; font-weight: 900 !important; line-height: 1.3 !important; }
+            .student-grade { font-size: 12px !important; font-weight: 900 !important; margin-top: 2px !important; }
+            .empty-slot { font-size: 12px !important; }
+            .empty-seat-x { font-size: 36px !important; }
+
+            .hall-footer { display: flex !important; margin-top: 4px !important; padding-top: 4px !important; border-top: 3px solid #000 !important; }
+            .stat-box { padding: 2px 8px !important; font-size: 12px !important; }
+            
+            /* تثبيت وضعية الوسط لمدير المدرسة في الطباعة الكاملة */
+            .manager-sign { font-size: 14px !important; text-align: center !important; }
+
+            @page { size: A4 portrait; margin: 5mm; } 
+
+            /* ================= وضعية طباعة القطاعات منفصلة للمعلمين ================= */
+            body.print-sectors-mode .hall-card { 
+                border: none !important; 
+                padding: 0 !important; 
+                height: auto !important; 
+                display: block !important; 
+            }
+            
+            body.print-sectors-mode > .container > #outputArea > .hall-card > .hall-header-table { display: none !important; }
+            body.print-sectors-mode > .container > #outputArea > .hall-card > .hall-footer { display: none !important; }
+            body.print-sectors-mode .sector-header, body.print-sectors-mode .sector-divider { display: none !important; }
+
+            body.print-sectors-mode .sector-block {
+                page-break-after: always !important;
+                border: 4px solid #000000 !important;
+                padding: 15px !important;
+                height: 287mm !important;
+                box-sizing: border-box !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+            }
+            
+            body.print-sectors-mode .hall-header-table-sector { display: table !important; }
+            body.print-sectors-mode .hall-footer-sector { display: flex !important; }
+            
+            /* تثبيت وضعية الوسط لمدير المدرسة في طباعة القطاعات المنفصلة */
+            body.print-sectors-mode .hall-footer-sector .manager-sign { text-align: center !important; }
+
+            /* ================= وضعية طباعة قصاصات أسماء التلاميذ (للمقاعد) ================= */
+            body.print-slips-mode h1.main-title,
+            body.print-slips-mode .setup-section,
+            body.print-slips-mode .controls,
+            body.print-slips-mode #outputArea { display: none !important; }
+
+            body.print-slips-mode .container { padding: 0 !important; }
+
+            body.print-slips-mode .slips-area {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 5mm;
+            }
+
+            body.print-slips-mode .slip-card {
+                height: 30mm;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="main-title">نظام التوزيع والخرائط الامتحانية للمدارس Prepared by/Alia M.K.  </h1>
+    
+    <div class="setup-section">
+        <div>
+            <div class="form-group">
+                <label for="seatMode">نظام توزيع المقاعد المستهدف:</label>
+                <select id="seatMode" onchange="toggleInputLabel(); autoSaveData();">
+                    <option value="single">مقعد مفرد (تلميذ واحد - عمودين من Excel)</option>
+                    <option value="double" selected>مقعد زوجي مشترك (تلميذان - 4 أعمدة من Excel)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label id="inputInstructions">بيانات التلاميذ (اسم1 [تاب] صف1 [تاب] اسم2 [تاب] صف2):</label>
+                <textarea id="studentData" oninput="autoSaveData()" placeholder="الصق البيانات هنا..."></textarea>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div class="form-group">
+                    <label for="columnsCount">المقاعد أفقياً في الصف الواحد:</label>
+                    <input type="number" id="columnsCount" value="3" min="1" max="10" oninput="autoSaveData()">
+                </div>
+                <div class="form-group">
+                    <label for="defaultSeatsPerSector">عدد المقاعد الافتراضي للقطاع الواحد:</label>
+                    <input type="number" id="defaultSeatsPerSector" value="12" min="1" oninput="autoSaveData()">
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="form-group"> <label for="schoolName">اسم المدرسة (الإدارة):</label> <input type="text" id="schoolName" value="اسم المدرسة " oninput="autoSaveData()"> </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div class="form-group">
+                    <label for="examType">نوع الامتحان:</label>
+                    <select id="examType" onchange="autoSaveData()">
+                        <option value="الامتحانات الامتحانية لنصف السنة">امتحانات نصف السنة</option>
+                        <option value="الامتحانات الامتحانية لنهاية السنة">امتحانات نهاية السنة</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="examTurn">الدور:</label>
+                    <select id="examTurn" onchange="autoSaveData()"> <option value="الدور الأول">الدور الأول</option> <option value="الدور الثاني">الدور الثاني</option> </select>
+                </div>
+            </div>
+            <div class="form-group"> <label for="academicYear">العام الدراسي:</label> <input type="text" id="academicYear" value="2026 - 2027" oninput="autoSaveData()"> </div>
+            <div class="form-group"> <label for="schoolManager">مدير / مديرة المدرسة:</label> <input type="text" id="schoolManager" value="اسم مدير المدرسة " oninput="autoSaveData()"> </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="btn-primary" onclick="initAndGenerate()">⚙️ توزيع التلاميذ وتوليد القاعات</button>
+        <button class="btn-success" onclick="printFullHalls()">🖨️ طباعة القاعات كاملة (A4 واضحة ومكرة)</button>
+        <button class="btn-info" onclick="printSectorsSeparately()">📑 طباعة القطاعات منفصلة لكل معلم</button>
+        <button class="btn-warning" onclick="printStudentSlips()">🏷️ طباعة قصاصات التلاميذ (للمقاعد)</button>
+        <button class="btn-danger" onclick="resetForm()">❌ تفريغ البيانات</button>
+    </div>
+    
+    <div id="outputArea"></div>
+    <div id="slipsArea" class="slips-area"></div>
+</div>
+
+<script>
+    let sectorConfigs = {}; 
+    let parsedData = []; 
+
+    function toArabicDigits(num) {
+        if(!num) return "";
+        const id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return num.toString().replace(/[0-9]/g, function(w) {
+            return id[+w];
+        });
+    }
+
+    function toggleInputLabel() {
+        const mode = document.getElementById('seatMode').value;
+        const label = document.getElementById('inputInstructions');
+        if (mode === 'single') {
+            label.innerText = "بيانات التلاميذ (انسخ عمودين فقط من Excel: الاسم [تاب] الصف):";
+        } else {
+            label.innerText = "بيانات التلاميذ (انسخ 4 أعمدة من Excel: اسم1 [تاب] صف1 [تاب] اسم2 [تاب] صف2):";
+        }
+    }
+
+    function autoSaveData() {
+        const dataToSave = {
+            seatMode: document.getElementById('seatMode').value,
+            studentData: document.getElementById('studentData').value,
+            columnsCount: document.getElementById('columnsCount').value,
+            defaultSeatsPerSector: document.getElementById('defaultSeatsPerSector').value,
+            schoolName: document.getElementById('schoolName').value,
+            examType: document.getElementById('examType').value,
+            examTurn: document.getElementById('examTurn').value,
+            academicYear: document.getElementById('academicYear').value,
+            schoolManager: document.getElementById('schoolManager').value
+        };
+        localStorage.setItem('examSystem_vFakhamaPrintSave', JSON.stringify(dataToSave));
+    }
+
+    function saveHallState() {
+        const hallState = { parsedData: parsedData, sectorConfigs: sectorConfigs };
+        localStorage.setItem('examSystem_vFakhamaHallState', JSON.stringify(hallState));
+    }
+
+    window.onload = function() {
+        const saved = localStorage.getItem('examSystem_vFakhamaPrintSave');
+        if (saved) {
+            const data = JSON.parse(saved);
+            document.getElementById('seatMode').value = data.seatMode;
+            document.getElementById('studentData').value = data.studentData;
+            document.getElementById('columnsCount').value = data.columnsCount;
+            document.getElementById('defaultSeatsPerSector').value = data.defaultSeatsPerSector;
+            document.getElementById('schoolName').value = data.schoolName;
+            document.getElementById('examType').value = data.examType;
+            document.getElementById('examTurn').value = data.examTurn;
+            document.getElementById('academicYear').value = data.academicYear;
+            document.getElementById('schoolManager').value = data.schoolManager;
+            toggleInputLabel();
+        }
+
+        const savedHalls = localStorage.getItem('examSystem_vFakhamaHallState');
+        if (savedHalls) {
+            const hallState = JSON.parse(savedHalls);
+            parsedData = hallState.parsedData || [];
+            sectorConfigs = hallState.sectorConfigs || {};
+            if (parsedData.length > 0) {
+                renderHalls();
+            }
+        }
+    };
+
+    function initAndGenerate() {
+        const text = document.getElementById('studentData').value.trim();
+        const mode = document.getElementById('seatMode').value;
+        if (!text) { alert('الرجاء لصق البيانات أولاً.'); return; }
+
+        parsedData = [];
+        let lines = text.split('\n');
+        
+        lines.forEach(line => {
+            if (line.trim() !== "") {
+                let parts = line.split('\t');
+                if (parts.length < 2) parts = line.split(/ {2,}/);
+                
+                if (mode === 'double') {
+                    let name1 = parts[0] ? parts[0].trim() : "";
+                    let grade1 = parts[1] ? parts[1].trim() : "";
+                    let name2 = parts[2] ? parts[2].trim() : "";
+                    let grade2 = parts[3] ? parts[3].trim() : "";
+                    if (name1 || name2) {
+                        parsedData.push({
+                            type: 'double',
+                            p1: name1 ? { name: name1, grade: grade1 } : null,
+                            p2: name2 ? { name: name2, grade: grade2 } : null
+                        });
+                    }
+                } else {
+                    let name = parts[0] ? parts[0].trim() : "";
+                    let grade = parts[1] ? parts[1].trim() : "";
+                    if (name) {
+                        parsedData.push({ type: 'single', name: name, grade: grade });
+                    }
+                }
+            }
+        });
+
+        sectorConfigs = {}; 
+        renderHalls();
+    }
+
+    function getGradeClass(gradeText) {
+        if (!gradeText) return 'grade-default';
+        if (gradeText.includes("سادس") || gradeText.includes("السادس")) return 'grade-6';
+        if (gradeText.includes("خامس") || gradeText.includes("الخامس")) return 'grade-5';
+        if (gradeText.includes("رابع") || gradeText.includes("الرابع")) return 'grade-4';
+        return 'grade-default';
+    }
+
+    function renderHalls() {
+        const defaultSeats = parseInt(document.getElementById('defaultSeatsPerSector').value);
+        const columnsCount = parseInt(document.getElementById('columnsCount').value);
+        const mode = document.getElementById('seatMode').value;
+        const outputArea = document.getElementById('outputArea');
+        
+        const schoolName = document.getElementById('schoolName').value;
+        const examType = document.getElementById('examType').options[document.getElementById('examType').selectedIndex].text;
+        const examTurn = document.getElementById('examTurn').options[document.getElementById('examTurn').selectedIndex].text;
+        const academicYear = toArabicDigits(document.getElementById('academicYear').value);
+        const schoolManager = document.getElementById('schoolManager').value;
+
+        outputArea.innerHTML = ''; 
+        let dataIndex = 0;
+        let currentHallNumber = 1;
+        let sectorCounter = 1; 
+
+        while (dataIndex < parsedData.length) {
+            let hallCard = document.createElement('div');
+            hallCard.className = 'hall-card';
+            
+            let arabicHallNum = toArabicDigits(currentHallNumber);
+
+            let headerTable = document.createElement('table');
+            headerTable.className = 'hall-header-table';
+            headerTable.innerHTML = `
+                <tr>
+                    <td class="header-right">${schoolName}</td>
+                    <td class="header-center">${examType}<br>${examTurn}<br>العام الدراسي: ${academicYear}</td>
+                    <td class="header-left">خارطة جلوس التلاميذ<br>العام الدراسي: ${academicYear}<br>القاعة رقم (${arabicHallNum})</td>
+                </tr>
+            `;
+            hallCard.appendChild(headerTable);
+            
+            let hallStats = { fourth: 0, fifth: 0, sixth: 0 };
+
+            for (let s = 1; s <= 2; s++) {
+                let currentSectorNum = sectorCounter;
+                let arabicSectorNum = toArabicDigits(currentSectorNum);
+                
+                if (!sectorConfigs[currentSectorNum]) {
+                    let initialLayout = [];
+                    for(let k = 1; k <= defaultSeats; k++) {
+                        initialLayout.push({ id: k, rawNum: k, isEmpty: false });
+                    }
+                    sectorConfigs[currentSectorNum] = { layout: initialLayout, virtualCounter: defaultSeats };
+                }
+                
+                let config = sectorConfigs[currentSectorNum];
+                let sectorBlock = document.createElement('div');
+                sectorBlock.className = 'sector-block';
+
+                // تم تعديل جهة اليسار: حذف العام الدراسي والمحاذاة إلى اليمين بامتياز
+                sectorBlock.innerHTML = `
+                    <table class="hall-header-table-sector">
+                        <tr>
+                            <td class="header-right">${schoolName}</td>
+                            <td class="header-center">${examType}<br>${examTurn}<br>العام الدراسي: ${academicYear}</td>
+                            <td class="header-left">خارطة جلوس التلاميذ<br>القطاع رقم (${arabicSectorNum})</td>
+                        </tr>
+                    </table>
+                `;
+                
+                let sectorHeader = document.createElement('div');
+                sectorHeader.className = (s === 1) ? 'sector-header' : 'sector-divider';
+                sectorHeader.innerHTML = `
+                    <span>القطاع رقم (${arabicSectorNum})</span>
+                    <span class="door-notice">🚪 الباب وممر الحركة جهة اليمين</span>
+                    <div>
+                        <button class="btn-sector-control" onclick="addSeatLeft(${currentSectorNum})">➕ إضافة مقعد</button>
+                        <button class="btn-sector-control" onclick="removeSeatRight(${currentSectorNum})">➖ حذف مقعد</button>
+                        <button class="btn-sector-control" onclick="editSectorEmpties(${currentSectorNum})">❌ المقاعد الفارغة</button>
+                    </div>
+                `;
+                sectorBlock.appendChild(sectorHeader);
+                
+                let grid = document.createElement('div');
+                grid.className = 'seats-grid';
+                grid.style.gridTemplateColumns = `repeat(${columnsCount}, 1fr)`;
+                
+                let sectorStats = { fourth: 0, fifth: 0, sixth: 0 };
+
+                config.layout.forEach(seat => {
+                    if (seat.isEmpty) {
+                        grid.appendChild(createSeatElement(seat.rawNum, null, mode));
+                    } else {
+                        let item = parsedData[dataIndex];
+                        if (item) {
+                            grid.appendChild(createSeatElement(seat.rawNum, item, mode));
+                            if (mode === 'double') {
+                                if (item.p1) { countGrade(item.p1.grade, hallStats); countGrade(item.p1.grade, sectorStats); }
+                                if (item.p2) { countGrade(item.p2.grade, hallStats); countGrade(item.p2.grade, sectorStats); }
+                            } else {
+                                countGrade(item.grade, hallStats); countGrade(item.grade, sectorStats);
+                            }
+                            dataIndex++;
+                        } else {
+                            grid.appendChild(createSeatElement(seat.rawNum, null, mode));
+                        }
+                    }
+                });
+                
+                sectorBlock.appendChild(grid);
+
+                let sectorFooter = document.createElement('div');
+                sectorFooter.className = 'hall-footer-sector';
+                sectorFooter.innerHTML = `
+                    <div class="stats-boxes">
+                        <div class="stat-box">تلاميذ الصف الرابع: <span class="grade-4">${toArabicDigits(sectorStats.fourth)}</span></div>
+                        <div class="stat-box">تلاميذ الصف الخامس: <span class="grade-5">${toArabicDigits(sectorStats.fifth)}</span></div>
+                        <div class="stat-box">تلاميذ الصف السادس: <span class="grade-6">${toArabicDigits(sectorStats.sixth)}</span></div>
+                    </div>
+                    <div class="manager-sign">مدير / مديرة المدرسة<br><br><span><b>${schoolManager}</b></span></div>
+                `;
+        sectorBlock.appendChild(sectorFooter);
+              hallCard.appendChild(sectorBlock);
+                sectorCounter++;
+            }
+            
+            let footerDiv = document.createElement('div');
+            footerDiv.className = 'hall-footer';
+            footerDiv.innerHTML = `
+                <div class="stats-boxes">
+                    <div class="stat-box">تلاميذ الصف الرابع: <span class="grade-4">${toArabicDigits(hallStats.fourth)}</span></div>
+                    <div class="stat-box">تلاميذ الصف الخامس: <span class="grade-5">${toArabicDigits(hallStats.fifth)}</span></div>
+                    <div class="stat-box">تلاميذ الصف السادس: <span class="grade-6">${toArabicDigits(hallStats.sixth)}</span></div>
+                </div>
+                <div class="manager-sign">مدير / مديرة المدرسة<br><br><span><b>${schoolManager}</b></span></div>
+            `;
+            hallCard.appendChild(footerDiv);
+            outputArea.appendChild(hallCard);
+            currentHallNumber++;
+        }
+
+        saveHallState();
+    }
+    
+    function addSeatLeft(sectorNum) {
+        let config = sectorConfigs[sectorNum];
+        config.virtualCounter++;
+        let newSeat = { id: config.virtualCounter, rawNum: "مضاف", isEmpty: false };
+        config.layout.unshift(newSeat);
+        renderHalls();
+    }
+    
+    function removeSeatRight(sectorNum) {
+        let config = sectorConfigs[sectorNum];
+        if (config.layout.length > 0) {
+            config.layout.pop();
+            renderHalls();
+        }
+    }
+    
+    function editSectorEmpties(sectorNum) {
+        let config = sectorConfigs[sectorNum];
+        let input = prompt(`أدخل أرقام المقاعد المراد جعلها فارغة (تظهر عليها X) في القطاع رقم (${toArabicDigits(sectorNum)}):`);
+        if (input !== null) {
+            let emptyIndices = input.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
+            config.layout.forEach((seat, index) => {
+                seat.isEmpty = emptyIndices.includes(index + 1);
+            });
+            renderHalls();
+        }
+    }
+
+    function countGrade(gradeText, statsObj) {
+        if (!gradeText) return;
+        if (gradeText.includes("رابع") || gradeText.includes("الرابع")) statsObj.fourth++;
+        else if (gradeText.includes("خامس") || gradeText.includes("الخامس")) statsObj.fifth++;
+        else if (gradeText.includes("سادس") || gradeText.includes("السادس")) statsObj.sixth++;
+    }
+    
+    function createSeatElement(rawNum, item, mode) {
+        let box = document.createElement('div');
+        box.className = 'seat-box';
+        
+        let numDiv = document.createElement('div');
+        numDiv.className = 'seat-number';
+        let numDisplay = (typeof rawNum === 'number') ? toArabicDigits(rawNum) : rawNum;
+        numDiv.innerHTML = `<span class="seat-label-text">مقعد رقم </span>${numDisplay}`;
+        box.appendChild(numDiv);
+        
+        if (!item) {
+            let emptyX = document.createElement('div');
+            emptyX.className = 'empty-seat-x'; emptyX.innerText = 'X';
+            box.appendChild(emptyX);
+            return box;
+        }
+        
+        if (mode === 'double') {
+            let container = document.createElement('div');
+            container.className = 'double-student-container';
+            
+            let slot1 = document.createElement('div');
+            slot1.className = 'student-slot';
+            if (item.p1 && item.p1.name) {
+                let gClass = getGradeClass(item.p1.grade);
+                slot1.innerHTML = `<div class="student-name">${item.p1.name}</div><div class="student-grade ${gClass}">${item.p1.grade}</div>`;
+            } else {
+                slot1.innerHTML = `<div class="empty-slot">- فارغ -</div>`;
+            }
+            
+            let slot2 = document.createElement('div');
+            slot2.className = 'student-slot';
+            if (item.p2 && item.p2.name) {
+                let gClass = getGradeClass(item.p2.grade);
+                slot2.innerHTML = `<div class="student-name">${item.p2.name}</div><div class="student-grade ${gClass}">${item.p2.grade}</div>`;
+            } else {
+                slot2.innerHTML = `<div class="empty-slot">- فارغ -</div>`;
+            }
+            
+            container.appendChild(slot1);
+            container.appendChild(slot2);
+            box.appendChild(container);
+        } else {
+            let container = document.createElement('div');
+            container.className = 'single-student-container';
+            let gClass = getGradeClass(item.grade);
+            container.innerHTML = `<div class="student-name">${item.name}</div><div class="student-grade ${gClass}">${item.grade}</div>`;
+            box.appendChild(container);
+        }
+        
+        return box;
+    }
+
+    function printFullHalls() {
+        document.body.classList.remove('print-sectors-mode', 'print-slips-mode');
+        window.print();
+    }
+
+    function printSectorsSeparately() {
+        document.body.classList.remove('print-slips-mode');
+        document.body.classList.add('print-sectors-mode');
+        window.print();
+    }
+
+    function printStudentSlips() {
+        if (!parsedData || parsedData.length === 0) {
+            alert('يرجى الضغط على زر "توزيع التلاميذ وتوليد القاعات" أولاً بعد لصق بيانات التلاميذ.');
+            return;
+        }
+
+        // استخراج كل تلميذ بشكل منفرد (حتى من المقاعد الزوجية) لإنشاء قصاصة خاصة به
+        let slips = [];
+        parsedData.forEach(item => {
+            if (item.type === 'double') {
+                if (item.p1 && item.p1.name) slips.push(item.p1);
+                if (item.p2 && item.p2.name) slips.push(item.p2);
+            } else {
+                if (item.name) slips.push(item);
+            }
+        });
+
+        if (slips.length === 0) {
+            alert('لا توجد بيانات تلاميذ صالحة لإنشاء القصاصات.');
+            return;
+        }
+
+        let slipsArea = document.getElementById('slipsArea');
+        slipsArea.innerHTML = '';
+
+        slips.forEach(st => {
+            let card = document.createElement('div');
+            card.className = 'slip-card';
+            card.innerHTML = `
+                <div class="slip-student-name">${st.name}</div>
+                <div class="slip-student-grade">${st.grade || ''}</div>
+            `;
+            slipsArea.appendChild(card);
+        });
+
+        document.body.classList.remove('print-sectors-mode');
+        document.body.classList.add('print-slips-mode');
+        window.print();
+    }
+    
+    function resetForm() {
+        if(confirm("هل تريد بالتأكيد إعادة تعيين وتفريغ كل شيء؟")) {
+            document.getElementById('studentData').value = '';
+            document.getElementById('outputArea').innerHTML = '';
+            localStorage.removeItem('examSystem_vFakhamaPrintSave');
+            localStorage.removeItem('examSystem_vFakhamaHallState');
+            sectorConfigs = {};
+            parsedData = [];
+        }
+    }
+</script>
+
+</body>
+</html>

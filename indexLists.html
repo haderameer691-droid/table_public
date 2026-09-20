@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منشئ قوائم الدرجات والقوائم الموحدة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Tajawal:wght@400;700;900&family=Almarai:wght@400;700;800&family=Amiri:wght@400;700&family=Changa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+
+        * {
+            box-sizing: border-box;
+            font-family: var(--doc-font, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+        }
+
+        body {
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .control-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 950px;
+            margin: 0 auto 30px auto;
+        }
+
+        .control-panel h2 {
+            margin-top: 0;
+            color: #1a73e8;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .saved-lists-section {
+            background: #eef3fc;
+            border: 1px solid #c7d8f8;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .saved-lists-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .saved-lists-section h3 {
+            margin: 0;
+            color: #1557b0;
+            font-size: 16px;
+        }
+
+        .backup-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-lists-box {
+            margin-bottom: 12px;
+        }
+
+        .search-lists-box input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .search-lists-box input:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26,115,232,0.15);
+        }
+
+        .multi-print-bar {
+            margin-bottom: 10px;
+        }
+
+        .accordion-group {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #eef3fb;
+            padding: 10px 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background: #e2ebfa;
+        }
+
+        .accordion-arrow {
+            display: inline-block;
+            transition: transform 0.15s;
+            font-size: 12px;
+            color: #1557b0;
+        }
+
+        .accordion-group.open .accordion-arrow {
+            transform: rotate(90deg);
+        }
+
+        .accordion-title {
+            font-weight: bold;
+            color: #1557b0;
+            flex: 1;
+        }
+
+        .accordion-count {
+            font-size: 12px;
+            color: #666;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 1px 10px;
+        }
+
+        .accordion-body {
+            display: none;
+        }
+
+        .accordion-group.open .accordion-body {
+            display: block;
+        }
+
+        .accordion-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 14px 8px 14px;
+            border-top: 1px solid #eee;
+            flex-wrap: wrap;
+        }
+
+        .accordion-item-title {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .accordion-item-sub {
+            font-size: 12px;
+            color: #666;
+            min-width: 140px;
+        }
+
+        .accordion-item-date {
+            font-size: 12px;
+            color: #888;
+            min-width: 120px;
+        }
+
+        .saved-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .saved-table th, .saved-table td {
+            padding: 8px 10px;
+            border: 1px solid #e0e0e0;
+            text-align: right;
+            font-size: 13px;
+        }
+
+        .saved-table th {
+            background: #e1e9f8;
+            font-weight: bold;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 3px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-load { background-color: #1a73e8; }
+        .btn-copy { background-color: #9334e6; }
+        .btn-print { background-color: #34a853; }
+        .btn-del { background-color: #d93025; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .columns-builder {
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 6px;
+            background: #fafafa;
+            margin-bottom: 20px;
+        }
+
+        .column-item {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn:hover { background-color: #1557b0; }
+        .btn-danger { background-color: #d93025; }
+        .btn-danger:hover { background-color: #a50e0e; }
+        .btn-success { background-color: #34a853; }
+        .btn-success:hover { background-color: #1e7e34; }
+        .btn-warning { background-color: #fbbc04; color: #000; }
+        .btn-warning:hover { background-color: #e5a700; }
+        .btn-purple { background-color: #6f42c1; color: white; }
+        .btn-purple:hover { background-color: #593196; }
+        .btn-dark { background-color: #4a5568; color: white; }
+        .btn-dark:hover { background-color: #2d3748; }
+
+        .page-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            padding: 10mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-family: var(--doc-font, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+        }
+
+        .page-content {
+            flex-grow: 1;
+        }
+
+        /* الترويسة */
+        .print-header {
+            border: 2px solid #000;
+            border-radius: 6px;
+            padding: 6px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .header-right {
+            text-align: right;
+            width: 30%;
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.4;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+        .header-center {
+            text-align: center;
+            width: 40%;
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .header-left {
+            text-align: right;
+            width: 30%;
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        /* الجداول */
+        table.exam-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #000;
+            text-align: center;
+            table-layout: fixed;
+        }
+
+        table.stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #000;
+            text-align: center;
+            table-layout: fixed;
+        }
+
+        table.exam-table th, table.stats-table th {
+            border: 1px solid #000;
+            padding: 3px 1px !important;
+            font-size: 12px;
+            font-weight: 900;
+            background-color: #f9f9f9;
+            line-height: 1.2;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .main-header-title {
+            margin-top: 0.2em;
+            margin-bottom: 0.2em;
+            display: block;
+        }
+
+        .sub-header-cell {
+            white-space: normal !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            font-size: 11px !important;
+            font-weight: bold;
+            padding: 2px 1px !important;
+            line-height: 1.2;
+            vertical-align: middle;
+        }
+
+        table.exam-table td, table.stats-table td {
+            border: 1px solid #000;
+            padding: 2px 1px;
+            font-size: 13px;
+            font-weight: bold;
+            height: 28px;
+            word-wrap: break-word;
+        }
+
+        /* الأعمدة الثابتة */
+        .seq-col {
+            width: 30px !important;
+        }
+
+        .record-col {
+            width: 60px !important;
+            font-size: 12px !important;
+        }
+
+        .student-name-col {
+            width: 155px !important;
+        }
+
+        .student-name-cell {
+            font-size: 13px !important;
+            font-weight: bold !important;
+            text-align: right;
+            padding-right: 5px !important;
+            padding-left: 2px !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .total-col-fixed {
+            width: 55px !important;
+        }
+
+        .wide-text-col {
+            width: 110px !important;
+            font-size: 11px !important;
+            white-space: normal !important;
+            word-break: break-word;
+        }
+
+        .after-total-col {
+            width: 155px !important;
+            font-size: 11px !important;
+            white-space: normal !important;
+            word-break: break-word;
+        }
+
+        table.stats-table {
+            margin-top: 15px;
+        }
+
+        table.stats-table td {
+            height: 28px;
+        }
+
+        .editable-cell {
+            outline: none;
+        }
+
+        .print-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 25px;
+            padding: 0 40px 10px 40px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .footer-left, .footer-right, .footer-center-single {
+            text-align: center;
+        }
+
+        .footer-left {
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        .footer-right {
+            margin-right: 0;
+            margin-left: auto;
+        }
+
+        @media print {
+            @page { margin: 8mm; }
+            .control-panel { display: none; }
+            body { background: none; padding: 0; }
+            .page { box-shadow: none; padding: 0; width: 100%; min-height: auto; }
+            .editable-cell { border: none; }
+            table.exam-table th, table.stats-table th { 
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="control-panel">
+    <h2>
+        <span>واجهة إدخال وإدارة القوائم الامتحانية</span>
+    </h2>
+
+    <!-- قسم القوائم المحفوظة -->
+    <div class="saved-lists-section">
+        <div class="saved-lists-header">
+            <h3>📂 القوائم المحفوظة في النظام</h3>
+            <div class="backup-btns">
+                <button class="btn-sm btn-purple" onclick="exportBackupData()">📥 تصدير نسخة احتياطية</button>
+                <button class="btn-sm btn-dark" onclick="triggerImportFile()">📤 استيراد البيانات</button>
+                <input type="file" id="importFileInput" accept="*/*, .json, application/json" style="display: none;" onchange="importBackupData(event)">
+            </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom: 10px;">
+            <div class="search-lists-box" style="flex:2; margin-bottom:0;">
+                <input type="text" id="searchListsInput" placeholder="🔍 ابحث حسب الصف أو المادة..." oninput="renderSavedListsTable()">
+            </div>
+            <div class="search-lists-box" style="flex:1; margin-bottom:0;">
+                <select id="filterClassSelect" onchange="renderSavedListsTable()">
+                    <option value="">تصفية حسب الصف والشعبة (الكل)</option>
+                </select>
+            </div>
+        </div>
+        <div class="multi-print-bar" style="display:flex; justify-content:space-between; align-items:center;">
+            <button class="btn-sm btn-load" onclick="printSelectedLists()">🖨️ طباعة القوائم المحددة (<span id="selectedCountLabel">0</span>)</button>
+            <label style="font-size:13px; display:flex; align-items:center; gap:5px;">
+                <input type="checkbox" id="selectAllListsCheckbox" onchange="toggleSelectAllLists(this.checked)"> تحديد كل القوائم الظاهرة
+            </label>
+        </div>
+        <div id="savedListsAccordion">
+            <p style="text-align: center; color: #777;">لا توجد قوائم محفوظة حتى الآن.</p>
+        </div>
+    </div>
+
+    <!-- حفظ قائمة جديدة -->
+    <div style="background: #e6ffe6; padding: 12px; border: 1px solid #34a853; border-radius: 6px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="listTitleToSave" placeholder="اكتب اسماً مميزاً لهذه القائمة..." style="flex:1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        <button class="btn btn-success" onclick="saveCurrentList()">💾 حفظ هذه القائمة</button>
+        <button class="btn btn-warning" onclick="createNewBlankList()">📄 قائمة جديدة فارغة</button>
+    </div>
+
+    <div class="form-grid">
+        <div class="form-group">
+            <label>نوع القائمة</label>
+            <select id="listCategory" onchange="onListCategoryChange()">
+                <option value="grades" selected>قائمة درجات</option>
+                <option value="unified">قائمة موحدة</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>اسم المدرسة</label>
+            <input type="text" id="schoolName" placeholder="أدخل اسم المدرسة" oninput="generateTable(false)">
+        </div>
+        <div class="form-group">
+            <label>نوع الامتحان</label>
+            <select id="examType" onchange="generateTable(false)">
+                <option value="نصف السنة">نصف السنة</option>
+                <option value="نهاية السنة">نهاية السنة</option>
+                <option value="الفصل الأول">الفصل الأول</option>
+                <option value="الفصل الثاني">الفصل الثاني</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>الدور</label>
+            <select id="examRound" onchange="generateTable(false)">
+                <option value="الأول">الأول</option>
+                <option value="الثاني">الثاني</option>
+                <option value="شهر تشرين الأول">شهر تشرين الأول</option>
+                <option value="شهر تشرين الثاني">شهر تشرين الثاني</option>
+                <option value="شهر كانون الأول">شهر كانون الأول</option>
+                <option value="شهر كانون الثاني">شهر كانون الثاني</option>
+                <option value="شهر شباط">شهر شباط</option>
+                <option value="شهر آذار">شهر آذار</option>
+                <option value="شهر نيسان">شهر نيسان</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>العام الدراسي</label>
+            <input type="text" id="academicYear" placeholder="مثال: 2025 - 2026" oninput="generateTable(false)">
+        </div>
+        <div class="form-group">
+            <label>الصف والشعبة</label>
+            <input type="text" id="gradeClass" placeholder="مثال: الأول ( أ )" oninput="generateTable(false)" onchange="checkNameBankSuggestion()">
+        </div>
+        <div class="form-group" id="subjectFormGroup">
+            <label>المادة</label>
+            <input type="text" id="subject" placeholder="اسم المادة" oninput="generateTable(false)">
+        </div>
+        <div class="form-group">
+            <label>التاريخ</label>
+            <input type="text" id="examDate" placeholder="مثال: 2026 / 01 / 15" oninput="generateTable(false)">
+        </div>
+        <div class="form-group">
+            <label>عدد الصفوف الفارغة</label>
+            <input type="number" id="studentCount" value="15" min="1" placeholder="مثال: 15" oninput="generateTable(true)">
+        </div>
+        
+        <!-- التوقيعات -->
+        <div class="form-group" id="teacherFormGroup">
+            <label>معلم المادة</label>
+            <input type="text" id="teacherName" placeholder="اسم المعلم" oninput="generateTable(false)">
+        </div>
+        <div class="form-group" id="principalFormGroup">
+            <label>مدير المدرسة</label>
+            <input type="text" id="principalName" placeholder="اسم مدير المدرسة" oninput="generateTable(false)">
+        </div>
+        <div class="form-group" id="examCommFormGroup" style="display: none;">
+            <label>رئيس اللجنة الامتحانية</label>
+            <input type="text" id="examCommHead" placeholder="اسم رئيس اللجنة الامتحانية" oninput="generateTable(false)">
+        </div>
+
+        <div class="form-group">
+            <label>لون صف العناوين</label>
+            <select id="headerColorSelect" onchange="generateTable(false)">
+                <option value="#ffffff">أبيض (بدون تظليل)</option>
+                <option value="#f0f0f0" selected>رمادي فاتح</option>
+                <option value="#e0e0e0">رمادي متوسط</option>
+                <option value="#e6f2ff">أزرق فاتح</option>
+                <option value="#cfe2ff">أزرق سماوي</option>
+                <option value="#e6ffe6">أخضر فاتح</option>
+                <option value="#d4f4dd">أخضر نعناعي</option>
+                <option value="#fffbe6">أصفر فاتح</option>
+                <option value="#fff3cd">أصفر ذهبي فاتح</option>
+                <option value="#ffe6e6">وردي فاتح</option>
+                <option value="#f8d7da">وردي مرجاني</option>
+                <option value="#f3e6ff">بنفسجي فاتح</option>
+                <option value="#e6d9c9">بيج/كافيه فاتح</option>
+                <option value="#ffe4cc">برتقالي فاتح</option>
+                <option value="#d9f2f2">فيروزي فاتح</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>نمط حدود الجدول</label>
+            <select id="borderStyleSelect" onchange="generateTable(false)">
+                <option value="solid-normal" selected>خط متصل (عادي)</option>
+                <option value="solid-thick">خط متصل (عريض)</option>
+                <option value="solid-bold-thick">خط متصل (عريض جداً)</option>
+                <option value="double">خط مزدوج (Double)</option>
+                <option value="dashed">خط متقطع (Dashed)</option>
+                <option value="dashed-thick">خط متقطع عريض</option>
+                <option value="groove">خط بارز حاد (Groove)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>نوع الخط</label>
+            <select id="fontFamilySelect" onchange="generateTable(false)">
+                <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" selected>افتراضي (Segoe UI)</option>
+                <option value="'Cairo', 'Segoe UI', sans-serif">القاهرة (Cairo)</option>
+                <option value="'Tajawal', 'Segoe UI', sans-serif">تجوال (Tajawal)</option>
+                <option value="'Almarai', 'Segoe UI', sans-serif">المراعي (Almarai)</option>
+                <option value="'IBM Plex Sans Arabic', 'Segoe UI', sans-serif">آي بي إم بلكس (IBM Plex)</option>
+                <option value="'Changa', 'Segoe UI', sans-serif">تشانغا (Changa)</option>
+                <option value="'Reem Kufi', 'Segoe UI', sans-serif">ريم كوفي (Reem Kufi)</option>
+                <option value="'Amiri', 'Traditional Arabic', serif">أميري (Amiri - خط نسخي)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>لغة الأرقام والعناوين الثابتة</label>
+            <select id="numberLangSelect" onchange="generateTable(false)">
+                <option value="ar" selected>عربي (١٢٣ - ت - اسم التلميذ)</option>
+                <option value="en">إنجليزي (123 - No. - Student Name)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- حقل اللصق -->
+    <div class="form-group" style="margin-bottom: 20px;">
+        <div id="nameBankSuggestionBox" style="display:none; background:#fff8e1; border:1px solid #ffc107; border-radius:6px; padding:10px 14px; margin-bottom:10px; font-size:13px;">
+            <span id="nameBankSuggestionText"></span>
+            <button class="btn-sm btn-load" onclick="applyNameBankSuggestion()" style="margin-right:8px;">📥 استيراد الأسماء</button>
+            <button class="btn-sm btn-del" onclick="dismissNameBankSuggestion()">إخفاء</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label id="pastedNamesLabel">استيراد الأسماء أو البيانات (نسخ ولصق من Excel / Word)</label>
+            <button class="btn-sm btn-copy" onclick="saveCurrentNamesToBank()">💾 حفظ هذه الأسماء في بنك الصف</button>
+        </div>
+        <textarea id="pastedNames" rows="5" placeholder="انسخ من إكسل ولصق هنا مباشرة..." oninput="generateTable(true)"></textarea>
+    </div>
+
+    <!-- بنك أسماء الصفوف -->
+    <div class="saved-lists-section">
+        <div class="saved-lists-header">
+            <h3>🗂️ بنك أسماء الصفوف</h3>
+            <div class="backup-btns">
+                <button class="btn-sm btn-purple" onclick="exportNameBank()">📥 تصدير نسخة احتياطية</button>
+                <button class="btn-sm btn-dark" onclick="triggerImportNameBankFile()">📤 استيراد نسخة احتياطية</button>
+                <input type="file" id="importNameBankFileInput" accept="*/*, .json, application/json" style="display: none;" onchange="importNameBank(event)">
+            </div>
+        </div>
+        <p style="font-size:12px; color:#666; margin: 0 0 10px 0;">
+            احفظ أسماء تلاميذ كل صف وشعبة مرة واحدة هنا (مع رقم القيد إن رغبت)، وسيقترح عليك النظام استيرادها تلقائيًا كلما أنشأت قائمة جديدة لنفس الصف.
+        </p>
+        <table class="saved-table">
+            <thead>
+                <tr>
+                    <th>الصف والشعبة</th>
+                    <th>عدد الأسماء</th>
+                    <th>آخر تحديث</th>
+                    <th style="width: 220px;">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="nameBankTbody">
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #777;">لا يوجد بنك أسماء محفوظ حتى الآن.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- إدارة الأعمدة -->
+    <div class="columns-builder">
+        <h3>تخصيص أعمدة المواد/التقسيمات</h3>
+        <div id="columnsList"></div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn" onclick="addColumnInput('before')">+ إضافة عمود فرعي (مرن التوزيع)</button>
+            <button class="btn btn-dark" onclick="addColumnInput('after')">+ إضافة عمود رئيسي بعد المجموع (ملاحظات / عرض ثابت)</button>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+        <button class="btn btn-success" onclick="generateTable(true)" style="flex: 1;">تحديث ومعاينة الجدول</button>
+        <button class="btn btn-danger" onclick="window.print()" style="width: 150px;">طباعة القائمة</button>
+    </div>
+</div>
+
+<!-- المعاينة والطباعة -->
+<div class="page-container">
+    <div class="page">
+        <div class="page-content">
+            <!-- الترويسة -->
+            <div class="print-header">
+                <div class="header-right">
+                    إدارة مدرسة<br>
+                    <span id="lblSchool"></span>
+                </div>
+
+                <div class="header-center">
+                    <div><span id="lblListTypeTitle">قائمة درجات امتحانات</span> <span id="lblExamType"></span></div>
+                    <div>الدور <span id="lblRound"></span></div>
+                    <div>للعام الدراسي <span id="lblYear"></span></div>
+                </div>
+
+                <div class="header-left">
+                    <span id="lblSubjectHeader">المادة: <span id="lblSubject"></span><br></span>
+                    الصف والشعبة: <span id="lblGrade"></span><br>
+                    التاريخ: <span id="lblDate"></span>
+                </div>
+            </div>
+
+            <!-- الجدول الرئيسي -->
+            <table class="exam-table" id="outputTable">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+
+            <!-- جدول الإحصاء -->
+            <table class="stats-table" id="statsTable">
+                <thead id="statsHead"></thead>
+                <tbody id="statsBody"></tbody>
+            </table>
+        </div>
+
+        <!-- التذييل والتوقيعات -->
+        <div class="print-footer" id="printFooterContainer"></div>
+    </div>
+</div>
+
+<script>
+    function convertToArabicNumbers(str) {
+        if (!str && str !== 0) return '';
+        const langSelect = document.getElementById('numberLangSelect');
+        const isEnglish = langSelect && langSelect.value === 'en';
+        if (isEnglish) return String(str);
+        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return String(str).replace(/[0-9]/g, function (w) {
+            return arabicNumbers[parseInt(w)];
+        });
+    }
+
+    let customColumns = [];
+    let currentLoadedListId = null;
+    let selectedListIds = new Set();
+
+    function onListCategoryChange() {
+        const cat = document.getElementById('listCategory').value;
+        const pastedLabel = document.getElementById('pastedNamesLabel');
+        const pastedTextarea = document.getElementById('pastedNames');
+        const subjectGroup = document.getElementById('subjectFormGroup');
+        const teacherGroup = document.getElementById('teacherFormGroup');
+        const principalGroup = document.getElementById('principalFormGroup');
+        const examCommGroup = document.getElementById('examCommFormGroup');
+
+        if (cat === 'unified') {
+            pastedLabel.innerText = 'استيراد الأسماء والقيد (نسخ ولصق من Excel / Word)';
+            pastedTextarea.placeholder = 'يمكنك نسخ عمود الأسماء فقط، أو نسخ عمودين (رقم القيد ثم الاسم) ولصقها هنا مباشرة...';
+            subjectGroup.style.display = 'none';
+            teacherGroup.style.display = 'none';
+            principalGroup.style.display = 'none';
+            examCommGroup.style.display = 'flex';
+        } else {
+            pastedLabel.innerText = 'استيراد أسماء التلاميذ (نسخ ولصق من Excel / Word)';
+            pastedTextarea.placeholder = 'انسخ قائمة الأسماء من إكسل ولصقها هنا مباشرة...';
+            subjectGroup.style.display = 'flex';
+            teacherGroup.style.display = 'flex';
+            principalGroup.style.display = 'flex';
+            examCommGroup.style.display = 'none';
+        }
+        generateTable(true);
+    }
+
+    function renderColumnInputs() {
+        const container = document.getElementById('columnsList');
+        container.innerHTML = '';
+
+        customColumns.forEach((col, index) => {
+            const div = document.createElement('div');
+            div.className = 'column-item';
+            const isAfter = col.isAfterTotal ? '<span style="color:#1557b0; font-size:11px;"> (عمود محدد القياس - بعد المجموع)</span>' : '<span style="color:#28a745; font-size:11px;"> (تقسيم فرعي - مرن التوزيع)</span>';
+
+            let subEditorsHtml = '';
+            if (col.subColumns && col.subColumns.length > 0) {
+                subEditorsHtml = '<div style="margin-right: 20px; margin-top: 6px; border-right: 2px solid #ddd; padding-right: 10px;">';
+                col.subColumns.forEach((sub, subIndex) => {
+                    subEditorsHtml += `
+                        <div style="margin-bottom: 4px;">
+                            <label style="font-size:10px; color:#555;">تقسيمات فرعية لـ "${sub.name}" (اختياري - اتركه فارغًا إن لم تحتجه):</label>
+                            <input type="text" placeholder="مثال: تسميع شفوي, كتابة" value="${sub.leaves ? sub.leaves.join(', ') : ''}"
+                                   onchange="updateLeafColumns(${index}, ${subIndex}, this.value)" style="width:100%;">
+                        </div>
+                    `;
+                });
+                subEditorsHtml += '</div>';
+            }
+
+            div.innerHTML = `
+                <div style="display:flex; gap: 10px; margin-bottom: 5px; align-items:center;">
+                    <input type="text" placeholder="اسم العمود الرئيسي" value="${col.name}" 
+                           onchange="customColumns[${index}].name = this.value; generateTable(false);" style="flex:1;">
+                    ${isAfter}
+                    <button class="btn btn-danger" onclick="removeColumn(${index})">حذف</button>
+                </div>
+                <div style="margin-right: 20px;">
+                    <label style="font-size:11px;">الأعمدة الفرعية (افصل بينها بفاصلة ,):</label>
+                    <input type="text" placeholder="مثال: حفظ, تلاوة, معاني" value="${col.subColumns ? col.subColumns.map(s => s.name).join(', ') : ''}" 
+                           onchange="updateSubColumns(${index}, this.value)" style="width:100%;">
+                </div>
+                ${subEditorsHtml}
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function addColumnInput(position) {
+        let totalIdx = customColumns.findIndex(c => c.name === "المجموع");
+        if (totalIdx === -1) totalIdx = customColumns.length - 1;
+
+        const isAfter = (position === 'after');
+        const newCol = { 
+            name: isAfter ? "الملاحظات" : "عمود جديد", 
+            subColumns: [],
+            isAfterTotal: isAfter
+        };
+
+        if (position === 'before') {
+            if (totalIdx >= 0) customColumns.splice(totalIdx, 0, newCol);
+            else customColumns.push(newCol);
+        } else {
+            customColumns.push(newCol);
+        }
+
+        renderColumnInputs();
+        generateTable(false);
+    }
+
+    function removeColumn(index) {
+        customColumns.splice(index, 1);
+        renderColumnInputs();
+        generateTable(false);
+    }
+
+    function normalizeSubColumns(subColumns) {
+        if (!subColumns) return [];
+        return subColumns.map(s => (typeof s === 'string') ? { name: s, leaves: [] } : { name: s.name, leaves: s.leaves || [] });
+    }
+
+    function updateSubColumns(index, value) {
+        const oldSubs = customColumns[index].subColumns || [];
+        if (value.trim() === '') {
+            customColumns[index].subColumns = [];
+        } else {
+            const names = value.split(',').map(item => item.trim());
+            customColumns[index].subColumns = names.map((name, i) => {
+                const existing = oldSubs[i] && oldSubs[i].name === name ? oldSubs[i] : oldSubs.find(s => s.name === name);
+                return { name: name, leaves: existing ? (existing.leaves || []) : [] };
+            });
+        }
+        renderColumnInputs();
+        generateTable(false);
+    }
+
+    function updateLeafColumns(colIndex, subIndex, value) {
+        const leaves = value.trim() === '' ? [] : value.split(',').map(item => item.trim());
+        customColumns[colIndex].subColumns[subIndex].leaves = leaves;
+        generateTable(false);
+    }
+
+    function updateTableStyles() {
+        const selectedColor = document.getElementById('headerColorSelect').value;
+        const selectedBorderStyle = document.getElementById('borderStyleSelect').value;
+        const selectedFont = document.getElementById('fontFamilySelect').value;
+
+        document.documentElement.style.setProperty('--doc-font', selectedFont);
+
+        const headers = document.querySelectorAll('table.exam-table th, table.stats-table th');
+        headers.forEach(th => {
+            th.style.backgroundColor = selectedColor;
+        });
+
+        let borderCss = '1px solid #000';
+        let mainBorderCss = '2px solid #000';
+
+        switch (selectedBorderStyle) {
+            case 'solid-thick': borderCss = '2px solid #000'; mainBorderCss = '3px solid #000'; break;
+            case 'solid-bold-thick': borderCss = '3px solid #000'; mainBorderCss = '4px solid #000'; break;
+            case 'double': borderCss = '3px double #000'; mainBorderCss = '4px double #000'; break;
+            case 'dashed': borderCss = '1px dashed #000'; mainBorderCss = '2px dashed #000'; break;
+            case 'dashed-thick': borderCss = '2px dashed #000'; mainBorderCss = '3px dashed #000'; break;
+            case 'groove': borderCss = '2px groove #000'; mainBorderCss = '3px groove #000'; break;
+            default: borderCss = '1px solid #000'; mainBorderCss = '2px solid #000'; break;
+        }
+
+        document.querySelectorAll('table.exam-table, table.stats-table').forEach(table => {
+            table.style.border = mainBorderCss;
+        });
+
+        document.querySelectorAll('table.exam-table th, table.exam-table td, table.stats-table th, table.stats-table td').forEach(cell => {
+            cell.style.border = borderCss;
+        });
+    }
+
+    function generateTable(resetOldData = false) {
+        const isUnified = document.getElementById('listCategory').value === 'unified';
+
+        document.getElementById('lblSchool').innerText = convertToArabicNumbers(document.getElementById('schoolName').value);
+        document.getElementById('lblExamType').innerText = convertToArabicNumbers(document.getElementById('examType').value);
+        document.getElementById('lblRound').innerText = convertToArabicNumbers(document.getElementById('examRound').value);
+        document.getElementById('lblYear').innerText = convertToArabicNumbers(document.getElementById('academicYear').value);
+        document.getElementById('lblGrade').innerText = convertToArabicNumbers(document.getElementById('gradeClass').value);
+        document.getElementById('lblDate').innerText = convertToArabicNumbers(document.getElementById('examDate').value);
+
+        if (isUnified) {
+            document.getElementById('lblListTypeTitle').innerText = "القائمة الموحدة لنتائج امتحانات";
+            document.getElementById('lblSubjectHeader').style.display = 'none';
+        } else {
+            document.getElementById('lblListTypeTitle').innerText = "قائمة درجات امتحانات";
+            document.getElementById('lblSubjectHeader').style.display = 'inline';
+            document.getElementById('lblSubject').innerText = convertToArabicNumbers(document.getElementById('subject').value);
+        }
+
+        // التوقيعات
+        const footerContainer = document.getElementById('printFooterContainer');
+        if (isUnified) {
+            footerContainer.innerHTML = `
+                <div class="footer-left">
+                    رئيس اللجنة الامتحانية<br>
+                    <span>${document.getElementById('examCommHead').value}</span>
+                </div>
+            `;
+        } else {
+            footerContainer.innerHTML = `
+                <div class="footer-left">
+                    معلم المادة<br>
+                    <span>${document.getElementById('teacherName').value}</span>
+                </div>
+            `;
+        }
+
+        // إنشاء رؤوس الجدول
+        let hasSubColumns = customColumns.some(col => col.subColumns && col.subColumns.length > 0);
+        let hasLeafColumns = customColumns.some(col => (col.subColumns || []).some(sub => sub.leaves && sub.leaves.length > 0));
+        let headerRows = hasLeafColumns ? 3 : (hasSubColumns ? 2 : 1);
+
+        const thead = document.getElementById('tableHead');
+        thead.innerHTML = '';
+
+        let row1 = document.createElement('tr');
+        let row2 = document.createElement('tr');
+        let row3 = document.createElement('tr');
+
+        const isEnglishLang = document.getElementById('numberLangSelect').value === 'en';
+        const lblSeq = isEnglishLang ? 'No.' : 'ت';
+        const lblRecord = isEnglishLang ? 'Reg. No.' : 'رقم القيد';
+        const lblStudentName = isEnglishLang ? 'Student Name' : 'اسم التلميذ';
+
+        row1.innerHTML += `<th rowspan="${headerRows}" class="seq-col"><span class="main-header-title">${lblSeq}</span></th>`;
+        if (isUnified) {
+            row1.innerHTML += `<th rowspan="${headerRows}" class="record-col"><span class="main-header-title">${lblRecord}</span></th>`;
+        }
+        row1.innerHTML += `<th rowspan="${headerRows}" class="student-name-col"><span class="main-header-title">${lblStudentName}</span></th>`;
+
+        let subColInfoMap = [];
+
+        customColumns.forEach(col => {
+            let colNameArabic = convertToArabicNumbers(col.name);
+
+            if (col.subColumns && col.subColumns.length > 0) {
+                let colTotalSpan = col.subColumns.reduce((sum, sub) => sum + ((sub.leaves && sub.leaves.length > 0) ? sub.leaves.length : 1), 0);
+                row1.innerHTML += `<th colspan="${colTotalSpan}"><span class="main-header-title">${colNameArabic}</span></th>`;
+
+                col.subColumns.forEach(sub => {
+                    let subNameArabic = convertToArabicNumbers(sub.name);
+                    let isTextCol = (sub.name.trim() === "كتابة");
+                    let isNumTotal = (sub.name.trim() === "رقماً");
+
+                    if (sub.leaves && sub.leaves.length > 0) {
+                        row2.innerHTML += `<th colspan="${sub.leaves.length}" class="sub-header-cell">${subNameArabic}</th>`;
+                        sub.leaves.forEach(leaf => {
+                            let leafArabic = convertToArabicNumbers(leaf);
+                            let leafIsTextCol = (leaf.trim() === "كتابة");
+                            let leafIsNumTotal = (leaf.trim() === "رقماً");
+                            let cssClass = "";
+                            if (leafIsTextCol) cssClass = "wide-text-col";
+                            else if (leafIsNumTotal) cssClass = "total-col-fixed";
+
+                            subColInfoMap.push({ cssClass: cssClass });
+                            row3.innerHTML += `<th class="sub-header-cell ${cssClass}">${leafArabic}</th>`;
+                        });
+                    } else {
+                        let cssClass = "";
+                        if (isTextCol) cssClass = "wide-text-col";
+                        else if (isNumTotal) cssClass = "total-col-fixed";
+
+                        subColInfoMap.push({ cssClass: cssClass });
+                        row2.innerHTML += `<th rowspan="${headerRows - 1}" class="sub-header-cell ${cssClass}">${subNameArabic}</th>`;
+                    }
+                });
+            } else {
+                let cssClass = "";
+                if (col.isAfterTotal) cssClass = "after-total-col";
+                else if (col.name === "المجموع") cssClass = "total-col-fixed";
+
+                subColInfoMap.push({ cssClass: cssClass });
+                row1.innerHTML += `<th rowspan="${headerRows}" class="sub-header-cell ${cssClass}"><span class="main-header-title">${colNameArabic}</span></th>`;
+            }
+        });
+
+        thead.appendChild(row1);
+        if (headerRows >= 2 && row2.children.length > 0) {
+            thead.appendChild(row2);
+        }
+        if (headerRows >= 3 && row3.children.length > 0) {
+            thead.appendChild(row3);
+        }
+
+        const tbody = document.getElementById('tableBody');
+        let existingRowsData = [];
+        
+        if (!resetOldData) {
+            const currentTrs = tbody.querySelectorAll('tr');
+            currentTrs.forEach(tr => {
+                let rowCells = [];
+                tr.querySelectorAll('td.editable-cell').forEach(td => rowCells.push(td.innerText));
+                if(rowCells.length > 0) existingRowsData.push(rowCells);
+            });
+        }
+
+        tbody.innerHTML = '';
+
+        const rawPasted = document.getElementById('pastedNames').value.trim();
+        let parsedItems = [];
+
+        if (rawPasted !== '') {
+            const lines = rawPasted.split('\n');
+            lines.forEach(line => {
+                let cleaned = line.trim();
+                if (cleaned !== '') {
+                    let parts = cleaned.split('\t').map(p => p.trim()).filter(p => p !== '');
+                    if (isUnified) {
+                        if (parts.length >= 2) {
+                            parsedItems.push({ record: parts[0], name: parts.slice(1).join(' ') });
+                        } else {
+                            parsedItems.push({ record: '', name: cleaned });
+                        }
+                    } else {
+                        // في قائمة الدرجات (غير الموحدة) لا حاجة لرقم القيد: نأخذ آخر عمود (الاسم) فقط ونتجاهل رقم القيد إن وُجد
+                        if (parts.length >= 2) {
+                            parsedItems.push({ record: '', name: parts.slice(1).join(' ') });
+                        } else {
+                            parsedItems.push({ record: '', name: cleaned });
+                        }
+                    }
+                }
+            });
+        }
+
+        let rowCount = (parsedItems.length > 0) ? parsedItems.length : (parseInt(document.getElementById('studentCount').value) || 10);
+
+        for (let i = 1; i <= rowCount; i++) {
+            let item = parsedItems[i - 1] || { record: '', name: '' };
+            let arabicSeq = convertToArabicNumbers(i);
+            let tr = document.createElement('tr');
+            
+            let html = `<td class="seq-col">${arabicSeq}</td>`;
+            
+            if (isUnified) {
+                let savedRecord = (existingRowsData[i-1] && existingRowsData[i-1][0] !== undefined) ? existingRowsData[i-1][0] : item.record;
+                html += `<td contenteditable="true" class="editable-cell record-col">${convertToArabicNumbers(savedRecord)}</td>`;
+            }
+
+            let nameColIdx = isUnified ? 1 : 0;
+            let savedName = (existingRowsData[i-1] && existingRowsData[i-1][nameColIdx] !== undefined) ? existingRowsData[i-1][nameColIdx] : item.name;
+            html += `<td contenteditable="true" class="editable-cell student-name-col student-name-cell">${savedName}</td>`;
+            
+            let startGradeIdx = isUnified ? 2 : 1;
+            for (let j = 0; j < subColInfoMap.length; j++) {
+                let colInfo = subColInfoMap[j];
+                let savedVal = (existingRowsData[i-1] && existingRowsData[i-1][j + startGradeIdx] !== undefined) ? existingRowsData[i-1][j + startGradeIdx] : '';
+                html += `<td contenteditable="true" class="editable-cell ${colInfo.cssClass}">${savedVal}</td>`;
+            }
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+        }
+
+        generateStatsTable(isUnified);
+        updateTableStyles();
+    }
+
+    function generateStatsTable(isUnified) {
+        const statsHead = document.getElementById('statsHead');
+        const statsBody = document.getElementById('statsBody');
+
+        let savedStats = [];
+        document.querySelectorAll('#statsTable tbody td').forEach(td => savedStats.push(td.innerText));
+
+        statsHead.innerHTML = '';
+        statsBody.innerHTML = '';
+
+        let trH = document.createElement('tr');
+        let trB = document.createElement('tr');
+
+        let headers = ["عدد التلاميذ", "المشاركون", "الغائبون", "الناجحون", "الراسبون"];
+        if (isUnified) {
+            headers.push("المكملون");
+        }
+        headers.push("النسبة المئوية");
+
+        headers.forEach((h, idx) => {
+            trH.innerHTML += `<th><span class="main-header-title">${h}</span></th>`;
+            let val = savedStats[idx] !== undefined ? savedStats[idx] : '';
+            trB.innerHTML += `<td contenteditable="true" class="editable-cell">${val}</td>`;
+        });
+
+        statsHead.appendChild(trH);
+        statsBody.appendChild(trB);
+    }
+
+    /* --- إدارة الحفظ والنسخ الاحتياطي --- */
+
+    // ============ بنك أسماء الصفوف ============
+    function getNameBank() {
+        const data = localStorage.getItem('nameBankByClass');
+        return data ? JSON.parse(data) : {};
+    }
+
+    function normalizeClassKey(str) {
+        return (str || '').trim().replace(/\s+/g, ' ');
+    }
+
+    function saveCurrentNamesToBank() {
+        const classKey = normalizeClassKey(document.getElementById('gradeClass').value);
+        if (!classKey) {
+            alert('الرجاء إدخال "الصف والشعبة" أولاً قبل الحفظ في بنك الأسماء.');
+            return;
+        }
+        const text = document.getElementById('pastedNames').value.trim();
+        if (!text) {
+            alert('حقل الأسماء فارغ، لا يوجد ما يُحفظ.');
+            return;
+        }
+
+        const bank = getNameBank();
+        const existing = bank[classKey];
+        if (existing && !confirm(`يوجد بالفعل بنك أسماء محفوظ لصف "${classKey}". هل تريد استبداله بالأسماء الحالية؟`)) {
+            return;
+        }
+
+        bank[classKey] = {
+            text: text,
+            updatedDate: new Date().toLocaleDateString('ar-IQ') + ' ' + new Date().toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'})
+        };
+        localStorage.setItem('nameBankByClass', JSON.stringify(bank));
+        renderNameBankTable();
+        alert(`✓ تم حفظ أسماء صف "${classKey}" في بنك الأسماء بنجاح!`);
+    }
+
+    function checkNameBankSuggestion() {
+        const classKey = normalizeClassKey(document.getElementById('gradeClass').value);
+        const box = document.getElementById('nameBankSuggestionBox');
+        if (!classKey) { box.style.display = 'none'; return; }
+
+        const bank = getNameBank();
+        const entry = bank[classKey];
+        if (!entry) { box.style.display = 'none'; return; }
+
+        const count = entry.text.split('\n').filter(l => l.trim() !== '').length;
+        document.getElementById('nameBankSuggestionText').innerText =
+            `📥 يوجد بنك أسماء محفوظ لصف "${classKey}" (${convertToArabicNumbers(count)} اسم، آخر تحديث: ${entry.updatedDate})`;
+        box.style.display = 'block';
+    }
+
+    function applyNameBankSuggestion() {
+        const classKey = normalizeClassKey(document.getElementById('gradeClass').value);
+        const bank = getNameBank();
+        const entry = bank[classKey];
+        if (!entry) return;
+
+        const currentText = document.getElementById('pastedNames').value.trim();
+        if (currentText && !confirm('حقل الأسماء الحالي يحتوي على بيانات بالفعل. هل تريد استبدالها بأسماء بنك الصف؟')) {
+            return;
+        }
+
+        document.getElementById('pastedNames').value = entry.text;
+        generateTable(true);
+        dismissNameBankSuggestion();
+    }
+
+    function dismissNameBankSuggestion() {
+        document.getElementById('nameBankSuggestionBox').style.display = 'none';
+    }
+
+    function renderNameBankTable() {
+        const bank = getNameBank();
+        const tbody = document.getElementById('nameBankTbody');
+        tbody.innerHTML = '';
+
+        const keys = Object.keys(bank);
+        if (keys.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #777;">لا يوجد بنك أسماء محفوظ حتى الآن.</td></tr>';
+            return;
+        }
+
+        keys.forEach(classKey => {
+            const entry = bank[classKey];
+            const count = entry.text.split('\n').filter(l => l.trim() !== '').length;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${classKey}</strong></td>
+                <td>${convertToArabicNumbers(count)}</td>
+                <td>${entry.updatedDate}</td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-sm btn-load" onclick="importNameBankEntryToCurrent('${classKey}')">استيراد للحقل الحالي</button>
+                        <button class="btn-sm btn-del" onclick="deleteNameBankEntry('${classKey}')">حذف</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function importNameBankEntryToCurrent(classKey) {
+        const bank = getNameBank();
+        const entry = bank[classKey];
+        if (!entry) return;
+
+        const currentText = document.getElementById('pastedNames').value.trim();
+        if (currentText && !confirm('حقل الأسماء الحالي يحتوي على بيانات بالفعل. هل تريد استبدالها بأسماء هذا الصف؟')) {
+            return;
+        }
+
+        document.getElementById('gradeClass').value = classKey;
+        document.getElementById('pastedNames').value = entry.text;
+        generateTable(true);
+        dismissNameBankSuggestion();
+        document.querySelector('.form-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function deleteNameBankEntry(classKey) {
+        if (!confirm(`هل تريد حذف بنك أسماء صف "${classKey}" نهائياً؟`)) return;
+        const bank = getNameBank();
+        delete bank[classKey];
+        localStorage.setItem('nameBankByClass', JSON.stringify(bank));
+        renderNameBankTable();
+    }
+
+    function exportNameBank() {
+        const bank = getNameBank();
+        if (Object.keys(bank).length === 0) {
+            alert('لا يوجد بنك أسماء لتصديره كنسخة احتياطية!');
+            return;
+        }
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(bank, null, 2));
+        const downloadAnchor = document.createElement('a');
+        const todayDate = new Date().toISOString().slice(0, 10);
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `نسخة_احتياطية_بنك_الأسماء_${todayDate}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function triggerImportNameBankFile() {
+        document.getElementById('importNameBankFileInput').click();
+    }
+
+    function importNameBank(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                const importedBank = JSON.parse(e.target.result);
+                if (typeof importedBank !== 'object') {
+                    throw new Error('ملف غير صالح');
+                }
+                const currentBank = getNameBank();
+                const mergedBank = { ...currentBank, ...importedBank };
+                localStorage.setItem('nameBankByClass', JSON.stringify(mergedBank));
+                renderNameBankTable();
+                alert('✓ تم استيراد بنك الأسماء بنجاح!');
+            } catch (err) {
+                alert('⚠️ عذراً، الملف المحدد غير صالح كنسخة احتياطية لبنك الأسماء.');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+    // ============ نهاية بنك أسماء الصفوف ============
+
+    function getSavedListsFromStorage() {
+        const data = localStorage.getItem('allExamLists');
+        return data ? JSON.parse(data) : {};
+    }
+
+    let openAccordionGroups = new Set();
+
+    function renderSavedListsTable() {
+        const lists = getSavedListsFromStorage();
+        const container = document.getElementById('savedListsAccordion');
+
+        // إزالة أي معرّفات محددة لم تعد موجودة في التخزين
+        selectedListIds.forEach(id => { if (!lists[id]) selectedListIds.delete(id); });
+
+        // تحديث قائمة التصفية بالصفوف الموجودة فعليًا
+        const filterSelect = document.getElementById('filterClassSelect');
+        const previousFilterVal = filterSelect.value;
+        const allClassKeys = [...new Set(Object.values(lists).map(item => item.gradeClass || 'غير محدد'))].sort();
+        filterSelect.innerHTML = '<option value="">تصفية حسب الصف والشعبة (الكل)</option>' +
+            allClassKeys.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (allClassKeys.includes(previousFilterVal)) filterSelect.value = previousFilterVal;
+
+        const searchInput = document.getElementById('searchListsInput');
+        const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+        const classFilter = filterSelect.value;
+
+        let keys = Object.keys(lists);
+
+        if (searchTerm) {
+            keys = keys.filter(id => {
+                const item = lists[id];
+                const gradeClass = (item.gradeClass || '').toLowerCase();
+                const subject = (item.subject || '').toLowerCase();
+                return gradeClass.includes(searchTerm) || subject.includes(searchTerm);
+            });
+        }
+
+        if (classFilter) {
+            keys = keys.filter(id => (lists[id].gradeClass || 'غير محدد') === classFilter);
+        }
+
+        updateSelectedCountLabel();
+
+        if (keys.length === 0) {
+            const msg = (searchTerm || classFilter) ? 'لا توجد قوائم مطابقة لبحثك.' : 'لا توجد قوائم محفوظة حتى الآن.';
+            container.innerHTML = `<p style="text-align: center; color: #777;">${msg}</p>`;
+            return;
+        }
+
+        // تجميع القوائم حسب الصف والشعبة
+        const groups = {};
+        keys.forEach(id => {
+            const item = lists[id];
+            const groupKey = item.gradeClass || 'غير محدد';
+            if (!groups[groupKey]) groups[groupKey] = [];
+            groups[groupKey].push({ id, item });
+        });
+
+        const groupKeysSorted = Object.keys(groups).sort();
+
+        // إن كان هناك بحث نصي أو تصفية فعّالة، افتح كل المجموعات الظاهرة تلقائيًا
+        const forceOpen = !!(searchTerm || classFilter);
+
+        container.innerHTML = '';
+        groupKeysSorted.forEach(groupKey => {
+            const groupItems = groups[groupKey];
+            const isOpen = forceOpen || openAccordionGroups.has(groupKey);
+
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'accordion-group' + (isOpen ? ' open' : '');
+            groupDiv.dataset.groupKey = groupKey;
+
+            const allGroupChecked = groupItems.every(({ id }) => selectedListIds.has(id));
+
+            let itemsHtml = '';
+            groupItems.forEach(({ id, item }) => {
+                const catBadge = item.listCategory === 'unified' ? ' <span style="color:purple; font-size:11px;">(موحدة)</span>' : '';
+                const isChecked = selectedListIds.has(id) ? 'checked' : '';
+                itemsHtml += `
+                    <div class="accordion-item">
+                        <input type="checkbox" class="list-select-checkbox" data-id="${id}" ${isChecked} onchange="toggleListSelection('${id}', this.checked)">
+                        <div class="accordion-item-title"><strong>${item.title}</strong>${catBadge}</div>
+                        <div class="accordion-item-sub">${item.subject || 'جميع المواد'}</div>
+                        <div class="accordion-item-date">${item.savedDate}</div>
+                        <div class="action-btns">
+                            <button class="btn-sm btn-load" onclick="loadListById('${id}')">فتح/تعديل</button>
+                            <button class="btn-sm btn-copy" onclick="duplicateListById('${id}')">نسخ القائمة</button>
+                            <button class="btn-sm btn-print" onclick="loadAndPrintList('${id}')">طباعة</button>
+                            <button class="btn-sm btn-del" onclick="deleteListById('${id}')">حذف</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            groupDiv.innerHTML = `
+                <div class="accordion-header" onclick="toggleAccordionGroup(event, '${groupKey}')">
+                    <span class="accordion-arrow">◀</span>
+                    <input type="checkbox" onclick="event.stopPropagation();" onchange="toggleGroupSelectAll('${groupKey}', this.checked)" ${allGroupChecked ? 'checked' : ''}>
+                    <span class="accordion-title">${groupKey}</span>
+                    <span class="accordion-count">${convertToArabicNumbers(groupItems.length)} قائمة</span>
+                </div>
+                <div class="accordion-body">${itemsHtml}</div>
+            `;
+
+            container.appendChild(groupDiv);
+        });
+
+        const selectAllBox = document.getElementById('selectAllListsCheckbox');
+        if (selectAllBox) {
+            selectAllBox.checked = keys.length > 0 && keys.every(id => selectedListIds.has(id));
+        }
+    }
+
+    function toggleAccordionGroup(event, groupKey) {
+        const groupDiv = event.currentTarget.closest('.accordion-group');
+        const isOpen = groupDiv.classList.toggle('open');
+        if (isOpen) openAccordionGroups.add(groupKey);
+        else openAccordionGroups.delete(groupKey);
+    }
+
+    function toggleGroupSelectAll(groupKey, checked) {
+        const groupDiv = document.querySelector(`.accordion-group[data-group-key="${CSS.escape(groupKey)}"]`);
+        if (!groupDiv) return;
+        groupDiv.querySelectorAll('.list-select-checkbox').forEach(cb => {
+            cb.checked = checked;
+            if (checked) selectedListIds.add(cb.dataset.id);
+            else selectedListIds.delete(cb.dataset.id);
+        });
+        updateSelectedCountLabel();
+
+        const selectAllBox = document.getElementById('selectAllListsCheckbox');
+        if (selectAllBox) {
+            const visibleIds = Array.from(document.querySelectorAll('.list-select-checkbox')).map(cb => cb.dataset.id);
+            selectAllBox.checked = visibleIds.length > 0 && visibleIds.every(vid => selectedListIds.has(vid));
+        }
+    }
+
+    function toggleListSelection(id, checked) {
+        if (checked) selectedListIds.add(id);
+        else selectedListIds.delete(id);
+        updateSelectedCountLabel();
+
+        const selectAllBox = document.getElementById('selectAllListsCheckbox');
+        if (selectAllBox) {
+            const visibleIds = Array.from(document.querySelectorAll('.list-select-checkbox')).map(cb => cb.dataset.id);
+            selectAllBox.checked = visibleIds.length > 0 && visibleIds.every(vid => selectedListIds.has(vid));
+        }
+
+        // تحديث حالة مربع "تحديد الكل" الخاص بالمجموعة التي ينتمي إليها هذا العنصر
+        const cb = document.querySelector(`.list-select-checkbox[data-id="${id}"]`);
+        if (cb) {
+            const groupDiv = cb.closest('.accordion-group');
+            if (groupDiv) {
+                const groupBox = groupDiv.querySelector('.accordion-header > input[type="checkbox"]');
+                const groupCheckboxes = groupDiv.querySelectorAll('.list-select-checkbox');
+                if (groupBox) {
+                    groupBox.checked = Array.from(groupCheckboxes).every(c => selectedListIds.has(c.dataset.id));
+                }
+            }
+        }
+    }
+
+    function toggleSelectAllLists(checked) {
+        document.querySelectorAll('.list-select-checkbox').forEach(cb => {
+            cb.checked = checked;
+            if (checked) selectedListIds.add(cb.dataset.id);
+            else selectedListIds.delete(cb.dataset.id);
+        });
+        document.querySelectorAll('.accordion-header > input[type="checkbox"]').forEach(cb => cb.checked = checked);
+        updateSelectedCountLabel();
+    }
+
+    function updateSelectedCountLabel() {
+        const label = document.getElementById('selectedCountLabel');
+        if (label) label.innerText = convertToArabicNumbers(selectedListIds.size);
+    }
+
+    function buildCurrentListObject(title) {
+        let tableGrades = [];
+        const rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach(tr => {
+            let rowVals = [];
+            tr.querySelectorAll('td.editable-cell').forEach(td => rowVals.push(td.innerText));
+            tableGrades.push(rowVals);
+        });
+
+        let statsVals = [];
+        document.querySelectorAll('#statsTable tbody td').forEach(td => statsVals.push(td.innerText));
+
+        return {
+            title: title,
+            listCategory: document.getElementById('listCategory').value,
+            schoolName: document.getElementById('schoolName').value,
+            examType: document.getElementById('examType').value,
+            examRound: document.getElementById('examRound').value,
+            academicYear: document.getElementById('academicYear').value,
+            gradeClass: document.getElementById('gradeClass').value,
+            subject: document.getElementById('subject').value,
+            examDate: document.getElementById('examDate').value,
+            studentCount: document.getElementById('studentCount').value,
+            teacherName: document.getElementById('teacherName').value,
+            principalName: document.getElementById('principalName').value,
+            examCommHead: document.getElementById('examCommHead').value,
+            headerColorSelect: document.getElementById('headerColorSelect').value,
+            borderStyleSelect: document.getElementById('borderStyleSelect').value,
+            fontFamilySelect: document.getElementById('fontFamilySelect').value,
+            numberLangSelect: document.getElementById('numberLangSelect').value,
+            pastedNames: document.getElementById('pastedNames').value,
+            customColumns: customColumns,
+            tableGrades: tableGrades,
+            statsVals: statsVals
+        };
+    }
+
+    function saveCurrentList() {
+        let titleInput = document.getElementById('listTitleToSave').value.trim();
+        if (!titleInput) {
+            titleInput = prompt("الرجاء إدخال اسم مميز لهذه القائمة:", document.getElementById('gradeClass').value + " - " + document.getElementById('subject').value);
+            if (!titleInput) return;
+        }
+
+        const id = currentLoadedListId ? currentLoadedListId : 'list_' + Date.now();
+
+        const listObject = buildCurrentListObject(titleInput);
+        listObject.id = id;
+        listObject.savedDate = new Date().toLocaleDateString('ar-IQ') + ' ' + new Date().toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'});
+
+        const allLists = getSavedListsFromStorage();
+        allLists[id] = listObject;
+        localStorage.setItem('allExamLists', JSON.stringify(allLists));
+
+        renderSavedListsTable();
+        alert('✓ تم حفظ القائمة ("' + titleInput + '") بنجاح!');
+
+        // إفراغ خانة اسم القائمة ولزق الأسماء وتفريغ الـ ID لتجهيز إدخال قائمة جديدة
+        document.getElementById('listTitleToSave').value = '';
+        document.getElementById('pastedNames').value = '';
+        currentLoadedListId = null;
+    }
+
+    function applyItemToForm(item, titleOverride) {
+        document.getElementById('listCategory').value = item.listCategory || 'grades';
+        document.getElementById('listTitleToSave').value = (titleOverride !== undefined) ? titleOverride : (item.title || '');
+        document.getElementById('schoolName').value = item.schoolName || '';
+        document.getElementById('examType').value = item.examType || 'نصف السنة';
+        document.getElementById('examRound').value = item.examRound || 'الأول';
+        document.getElementById('academicYear').value = item.academicYear || '';
+        document.getElementById('gradeClass').value = item.gradeClass || '';
+        document.getElementById('subject').value = item.subject || '';
+        document.getElementById('examDate').value = item.examDate || '';
+        document.getElementById('studentCount').value = item.studentCount || 15;
+        document.getElementById('teacherName').value = item.teacherName || '';
+        document.getElementById('principalName').value = item.principalName || '';
+        document.getElementById('examCommHead').value = item.examCommHead || '';
+        document.getElementById('headerColorSelect').value = item.headerColorSelect || '#f0f0f0';
+        document.getElementById('borderStyleSelect').value = item.borderStyleSelect || 'solid-normal';
+        document.getElementById('fontFamilySelect').value = item.fontFamilySelect || "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        document.getElementById('numberLangSelect').value = item.numberLangSelect || 'ar';
+        document.getElementById('pastedNames').value = item.pastedNames || '';
+
+        customColumns = item.customColumns || [];
+        customColumns.forEach(col => { col.subColumns = normalizeSubColumns(col.subColumns); });
+
+        onListCategoryChange();
+        renderColumnInputs();
+        generateTable(false);
+
+        if (item.tableGrades && item.tableGrades.length > 0) {
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach((tr, rIdx) => {
+                if (item.tableGrades[rIdx]) {
+                    const tds = tr.querySelectorAll('td.editable-cell');
+                    tds.forEach((td, cIdx) => {
+                        if (item.tableGrades[rIdx][cIdx] !== undefined) {
+                            td.innerText = item.tableGrades[rIdx][cIdx];
+                        }
+                    });
+                }
+            });
+        }
+
+        if (item.statsVals) {
+            const statsTds = document.querySelectorAll('#statsTable tbody td');
+            statsTds.forEach((td, idx) => {
+                if (item.statsVals[idx] !== undefined) {
+                    td.innerText = item.statsVals[idx];
+                }
+            });
+        }
+    }
+
+    function loadListById(id, isDuplicate = false) {
+        const allLists = getSavedListsFromStorage();
+        const item = allLists[id];
+        if (!item) return;
+
+        currentLoadedListId = isDuplicate ? null : id;
+        const titleVal = isDuplicate ? (item.title + ' - نسخة') : item.title;
+        applyItemToForm(item, titleVal);
+
+        document.querySelector('.form-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function duplicateListById(id) {
+        loadListById(id, true);
+    }
+
+    function loadAndPrintList(id) {
+        loadListById(id);
+        setTimeout(() => {
+            window.print();
+        }, 300);
+    }
+
+    function printSelectedLists() {
+        const ids = Array.from(document.querySelectorAll('.list-select-checkbox'))
+            .filter(cb => cb.checked)
+            .map(cb => cb.dataset.id);
+
+        if (ids.length === 0) {
+            alert('الرجاء تحديد قائمة واحدة على الأقل من مربعات الاختيار للطباعة.');
+            return;
+        }
+
+        const allLists = getSavedListsFromStorage();
+
+        // حفظ حالة الحقول الحالية (غير المحفوظة) لاستعادتها بعد انتهاء الطباعة الجماعية
+        const snapshot = buildCurrentListObject(document.getElementById('listTitleToSave').value);
+        const snapshotCurrentId = currentLoadedListId;
+
+        let pagesHtml = '';
+
+        ids.forEach(id => {
+            const item = allLists[id];
+            if (!item) return;
+            applyItemToForm(item);
+            const fontVal = getComputedStyle(document.documentElement).getPropertyValue('--doc-font').trim();
+            const pageEl = document.querySelector('.page');
+            pagesHtml += `<div class="print-page-wrap" style="--doc-font:${fontVal};">${pageEl.outerHTML}</div>`;
+        });
+
+        // استعادة الحالة الأصلية للحقول كما كانت قبل الطباعة الجماعية
+        applyItemToForm(snapshot);
+        currentLoadedListId = snapshotCurrentId;
+
+        const styleTag = document.querySelector('style').outerHTML;
+        const fontLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"], link[rel="preconnect"]')).map(l => l.outerHTML).join('\n');
+
+        const printWin = window.open('', '_blank');
+        printWin.document.write(`
+            <!DOCTYPE html>
+            <html lang="ar" dir="rtl">
+            <head>
+                <meta charset="UTF-8">
+                <title>طباعة القوائم المحددة</title>
+                ${fontLinks}
+                ${styleTag}
+                <style>
+                    .print-page-wrap:not(:last-child) { page-break-after: always; }
+                    body { background: none; padding: 0; }
+                </style>
+            </head>
+            <body>
+                ${pagesHtml}
+            </body>
+            </html>
+        `);
+        printWin.document.close();
+
+        printWin.onload = function () {
+            setTimeout(() => {
+                printWin.focus();
+                printWin.print();
+            }, 400);
+        };
+    }
+
+    function deleteListById(id) {
+        if (confirm("هل أنت تأكد من رغبتك في حذف هذه القائمة نهائياً؟")) {
+            const allLists = getSavedListsFromStorage();
+            delete allLists[id];
+            localStorage.setItem('allExamLists', JSON.stringify(allLists));
+            if (currentLoadedListId === id) {
+                createNewBlankList();
+            } else {
+                renderSavedListsTable();
+            }
+        }
+    }
+
+    /* ===== الدالة المسؤولة عن تفريغ وتصفير كافة البيانات والتقسيمات والحقول ===== */
+    function createNewBlankList() {
+        currentLoadedListId = null;
+        
+        // 1. تفريغ جميع الحقول والمدخلات
+        document.getElementById('listTitleToSave').value = '';
+        document.getElementById('schoolName').value = '';
+        document.getElementById('academicYear').value = '';
+        document.getElementById('gradeClass').value = '';
+        document.getElementById('subject').value = '';
+        document.getElementById('examDate').value = '';
+        document.getElementById('studentCount').value = 15;
+        document.getElementById('teacherName').value = '';
+        document.getElementById('principalName').value = '';
+        document.getElementById('examCommHead').value = '';
+        document.getElementById('pastedNames').value = '';
+        document.getElementById('fontFamilySelect').value = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        document.getElementById('numberLangSelect').value = 'ar';
+        dismissNameBankSuggestion();
+
+        // 2. تفريغ التقسيمات والأعمدة لادخال جديد
+        customColumns = [];
+
+        // 3. تحديث الواجهة وتوليد الجدول الفارغ
+        onListCategoryChange();
+        renderColumnInputs();
+        generateTable(true);
+
+        // 4. مسح بيانات جدول الإحصاء
+        document.querySelectorAll('#statsTable tbody td').forEach(td => td.innerText = '');
+    }
+
+    function exportBackupData() {
+        const allLists = getSavedListsFromStorage();
+        if (Object.keys(allLists).length === 0) {
+            alert("لا توجد قوائم محفوظة لتصديرها كنسخة احتياطية!");
+            return;
+        }
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allLists, null, 2));
+        const downloadAnchor = document.createElement('a');
+        const todayDate = new Date().toISOString().slice(0, 10);
+        
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `نسخة_احتياطية_قوائم_الدرجات_${todayDate}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function triggerImportFile() {
+        document.getElementById('importFileInput').click();
+    }
+
+    function importBackupData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedLists = JSON.parse(e.target.result);
+                if (typeof importedLists !== 'object') {
+                    throw new Error('ملف غير صالح');
+                }
+
+                const currentLists = getSavedListsFromStorage();
+                const mergedLists = { ...currentLists, ...importedLists };
+                
+                localStorage.setItem('allExamLists', JSON.stringify(mergedLists));
+                renderSavedListsTable();
+                alert('✓ تم استيراد البيانات والنسخة الاحتياطية بنجاح!');
+            } catch (err) {
+                alert('⚠️ عذراً، الملف المحدد غير صالح كنسخة احتياطية لقوائم الدرجات.');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    // عند فتح الصفحة لأول مرة، يتم استدعاء createNewBlankList() للبدء بصفحة فارغة تماماً
+    window.onload = function() {
+        createNewBlankList();
+        renderSavedListsTable();
+        renderNameBankTable();
+    };
+</script>
+
+</body>
+</html>

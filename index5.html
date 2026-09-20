@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a73e8">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="الإدارة المدرسية">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة الإدارة المدرسية - أستاذة علياء</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* حاوية تسجيل الدخول */
+        .login-container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #1a73e8;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #155cb4;
+        }
+
+        .error-msg {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* حاوية الواجهة الرئيسية */
+        .main-dashboard {
+            display: none;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .header-area h1 {
+            color: #1a73e8;
+            font-size: 24px;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #bd2130;
+        }
+
+        .main-dashboard > p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* شبكة الأزرار/الأيقونات */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .card-button {
+            background: white;
+            padding: 30px 15px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid transparent;
+        }
+
+        .card-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            border-color: #1a73e8;
+        }
+
+        .icon {
+            font-size: 45px;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- أولاً: واجهة تسجيل الدخول -->
+    <div class="login-container" id="loginBox">
+        <h2>تسجيل الدخول</h2>
+        <div class="input-group">
+            <label>اسم المستخدم:</label>
+            <input type="text" id="username" placeholder="أدخل اسم المستخدم">
+        </div>
+        <div class="input-group">
+            <label>كلمة المرور:</label>
+            <input type="password" id="password" placeholder="أدخل كلمة المرور">
+        </div>
+        <button class="btn-login" onclick="checkLogin()">دخول</button>
+        <div class="error-msg" id="errorMessage">اسم المستخدم أو كلمة المرور غير صحيحة!</div>
+    </div>
+
+    <!-- ثانياً: الواجهة الرئيسية للأنظمة -->
+    <div class="main-dashboard" id="dashboardBox">
+        <div class="header-area">
+            <h1>بوابة الإدارة المدرسية</h1>
+            <button class="btn-logout" onclick="logout()">تسجيل الخروج</button>
+        </div>
+        <p>Welcome, this is Alia.M.K ، يرجى اختيار المنظومة المطلوبة للعمل:</p>
+        
+        <div class="grid-container">
+            
+            <!-- الزر الوحيد: إنشاء القوائم الامتحانية -->
+<a href="examlists.html" target="_blank" class="card-button">
+    <div class="icon">📋</div>
+    <div class="card-title">إنشاء القوائم الامتحانية</div>
+</a>
+              <!-- الزر الأول: indexexam -->
+<a href="indexexam.html" target="_blank" class="card-button">
+    <div class="icon">📅</div>
+    <div class="card-title">جدول الامتحانات</div>
+</a>
+
+<!-- الزر الثاني: نظام توزيع خرائط الجلوس -->
+<a href="seats.html" target="_blank" class="card-button">
+    <div class="icon">🪑</div>
+    <div class="card-title">نظام التوزيع لخرائط الجلوس</div>
+</a>
+      
+<!-- الزر الرابع: منظومة الغياب والحضور -->
+<a href="absences.html" target="_blank" class="card-button">
+    <div class="icon">📝</div>
+    <div class="card-title">منظومة الغياب والحضور</div>
+</a>
+        </div>
+    </div>
+
+    <script>
+        // ===== كلمة المرور لم تعد مكتوبة هنا، بل بصمتها (Hash) فقط =====
+        // لتغييرها: افتحي الملف make-hash.html على جهازك، اكتبي اسم المستخدم وكلمة المرور الجديدين،
+        // ثم انسخي قيمتي SALT_HEX و HASH_HEX إلى هنا، وزيدي CREDENTIALS_VERSION بمقدار 1
+        const SALT_HEX = "ac1030ba9cbe05358a6f8978626e0098";
+const HASH_HEX = "c29d0df331ccf8887410951980b0eabf886d17386334e4e0092eaf64689956c9";
+        const PBKDF2_ITERATIONS = 250000;
+        const CREDENTIALS_VERSION = 2;
+
+        // مدة صلاحية الجلسة: شهر واحد (30 يوم) بالمللي ثانية
+        const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000;
+
+        window.onload = function() {
+            const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+            const lastActivity = parseInt(localStorage.getItem("lastActivity"), 10);
+            const storedVersion = parseInt(localStorage.getItem("credentialsVersion"), 10);
+
+            const sessionValid = isLoggedIn && lastActivity && (Date.now() - lastActivity < SESSION_DURATION);
+            const versionValid = storedVersion === CREDENTIALS_VERSION;
+
+            if (sessionValid && versionValid) {
+                showDashboard();
+            } else {
+                // انتهت مدة الجلسة، أو تغيّرت كلمة المرور، أو لا توجد جلسة صالحة: تسجيل خروج تلقائي
+                localStorage.removeItem("isLoggedIn");
+                localStorage.removeItem("lastActivity");
+                localStorage.removeItem("credentialsVersion");
+            }
+        };
+
+        async function deriveHash(user, pass) {
+            const enc = new TextEncoder();
+            const salt = new Uint8Array(SALT_HEX.match(/../g).map(b => parseInt(b, 16)));
+            const key = await crypto.subtle.importKey("raw", enc.encode(user + ":" + pass), "PBKDF2", false, ["deriveBits"]);
+            const bits = await crypto.subtle.deriveBits(
+                { name: "PBKDF2", salt: salt, iterations: PBKDF2_ITERATIONS, hash: "SHA-256" }, key, 256);
+            return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        async function checkLogin() {
+            const userInp = document.getElementById("username").value;
+            const passInp = document.getElementById("password").value;
+            const errorMsg = document.getElementById("errorMessage");
+
+            let ok = false;
+            try { ok = (await deriveHash(userInp, passInp)) === HASH_HEX; } catch (e) { ok = false; }
+
+            if (ok) {
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("lastActivity", Date.now().toString());
+                localStorage.setItem("credentialsVersion", CREDENTIALS_VERSION.toString());
+                showDashboard();
+            } else {
+                errorMsg.style.display = "block";
+            }
+        }
+
+        function showDashboard() {
+            // تحديث وقت آخر نشاط في كل مرة يتم فيها الدخول للوحة (يمدد الأسبوع من آخر زيارة)
+            localStorage.setItem("lastActivity", Date.now().toString());
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("dashboardBox").style.display = "block";
+            document.body.style.alignItems = "flex-start";
+            document.body.style.paddingTop = "40px";
+        }
+
+        function logout() {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("lastActivity");
+            localStorage.removeItem("credentialsVersion");
+            location.reload(); 
+        }
+    </script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  });
+}
+</script>
+</body>
+</html>

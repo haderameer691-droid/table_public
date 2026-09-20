@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدول الامتحانات الرسمية</title>
+    
+    <!-- تحميل مسبق للخطوط لضمان عملها الفوري دون تأخير في المتصفح -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,700;1,700&family=Cairo:wght@600;700;800;900&family=Changa:wght@600;700;800&family=Tajawal:wght@500;700;900&family=Almarai:wght@700;800&family=Mada:wght@600;700;900&family=El+Messiri:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* تعريف قواعد الخطوط لتسهيل استدعائها */
+        .font-cairo { font-family: 'Cairo', sans-serif !important; }
+        .font-tajawal { font-family: 'Tajawal', sans-serif !important; }
+        .font-amiri { font-family: 'Amiri', serif !important; }
+        .font-changa { font-family: 'Changa', sans-serif !important; }
+        /* خطوط مضغوطة إضافية: أحرف أضيق ومسافات أسطر أقل - توفّر مساحة رأسية عند الطباعة (مفيدة جداً بالوضع الأفقي) */
+        .font-almarai { font-family: 'Almarai', sans-serif !important; }
+        .font-mada    { font-family: 'Mada', sans-serif !important; }
+        .font-elmessiri { font-family: 'El Messiri', sans-serif !important; }
+        /* تقليص تباعد الأسطر والفقرات مع هذه الخطوط تحديداً لتوفير أكبر مساحة رأسية ممكنة (مثالي عند نقص المساحة في الوضع الأفقي) */
+        .font-almarai p, .font-mada p, .font-elmessiri p,
+        .font-almarai td, .font-mada td, .font-elmessiri td,
+        .font-almarai th, .font-mada th, .font-elmessiri th {
+            line-height: 1.15 !important;
+        }
+
+        /* تنسيقات عامة للخطوط والصفحة - تطبيق اللون الأسود الغامق */
+        body {
+            font-family: 'Cairo', 'Arial', sans-serif; 
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px 0;
+            color: #000000;
+            font-weight: 700;
+            box-sizing: border-box;
+        }
+
+        /* حاوية الصفحة الرئيسية - تحاكي ورقة A4 حقيقية */
+        .page-container {
+            width: 210mm; 
+            min-height: 297mm; /* مقاس A4 القياسي (عمودي افتراضياً) */
+            margin: 0 auto;
+            background: #fff;
+            padding: 45px; /* مسافة داخلية تمنع تداخل النصوص مع الإطار */
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+            position: relative; /* أساسي لتثبيت الإطار داخله */
+            box-sizing: border-box;
+            z-index: 2;
+        }
+
+        /* اتجاه الصفحة: عمودي (افتراضي) وأفقي - يُطبَّق على الشاشة والطباعة معاً لضمان تطابق المعاينة مع المطبوع */
+        .page-container.orientation-portrait {
+            width: 210mm;
+            min-height: 297mm;
+        }
+        .page-container.orientation-landscape {
+            width: 297mm;
+            min-height: 210mm;
+        }
+
+        /* الإطار الخارجي للصفحة - الموضع والأبعاد ثابتة دائماً، ونمط الحد يتغير عبر الأصناف أدناه فقط */
+        .print-border-frame {
+            display: block;
+            position: absolute;
+            top: 5mm;      /* تم تقليل الهامش الخارجي من 15px إلى 5mm لضمان عدم الالتصاق داخلياً */
+            bottom: 5mm;
+            left: 5mm;
+            right: 5mm;
+            pointer-events: none; /* لتفادي حظر النقرات على العناصر بالداخل */
+            z-index: 10;
+            box-sizing: border-box;
+        }
+
+        /* أنماط حد الصفحة المختلفة - صنف يُضاف على الإطار فقط، لا يغيّر أي من إعدادات الطباعة الأخرى (المقاس/الهوامش) */
+        .print-border-frame.frame-double  { border: 6px double #000000; }
+        .print-border-frame.frame-solid   { border: 4px solid #000000; }
+        .print-border-frame.frame-thick   { border: 8px solid #000000; }
+        .print-border-frame.frame-dashed  { border: 4px dashed #000000; }
+        .print-border-frame.frame-dotted  { border: 4px dotted #000000; }
+        .print-border-frame.frame-groove  { border: 8px groove #000000; }
+        .print-border-frame.frame-ridge   { border: 8px ridge #000000; }
+        .print-border-frame.frame-none    { border: none; }
+
+        /* لوحة التحكم (تختفي عند الطباعة) */
+        .control-panel {
+            width: 210mm;
+            margin: 0 auto 20px auto;
+            background-color: #eef2f3;
+            border: 2px solid #2c3e50;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Cairo', sans-serif !important; /* لوحة التحكم تحتفظ دائماً بخط مقروء وموحد */
+            color: #333;
+            box-sizing: border-box;
+        }
+        .control-panel h3 {
+            margin: 0 0 12px 0;
+            color: #2c3e50;
+            font-weight: 800;
+        }
+        .selectors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .selector-box {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .selector-box label {
+            font-size: 13px;
+            font-weight: 800;
+        }
+        .theme-select {
+            padding: 8px;
+            font-family: inherit;
+            font-weight: 700;
+            border: 2px solid #2c3e50;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 900;
+            font-size: 14px;
+            font-family: inherit;
+            margin-left: 5px;
+        }
+        .btn:hover {
+            background-color: #27ae60;
+        }
+        .btn-delete {
+            background-color: #e74c3c;
+        }
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+        .btn-print {
+            background-color: #3498db;
+        }
+        .btn-print:hover {
+            background-color: #2980b9;
+        }
+        .save-status {
+            display: inline-block;
+            margin-right: 15px;
+            font-size: 13px;
+            color: #27ae60;
+            font-weight: 900;
+        }
+
+        /* رأس الصفحة (Header) */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; 
+            margin-bottom: 25px;
+            gap: 15px;
+        }
+
+        .header-right {
+            width: 30%;
+            text-align: right;
+        }
+        .header-right h3 {
+            margin: 0;
+            padding: 0;
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.4;
+            color: #000;
+        }
+        .school-name-input {
+            border: none;
+            border-bottom: 2px solid #000;
+            outline: none;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 15px;
+            width: 170px;
+            padding: 0;
+            margin-top: 5px;
+            background: transparent;
+            color: #000;
+        }
+
+        .header-center {
+            width: 36%;
+            text-align: center;
+            border: 2.5px solid #000;
+            padding: 8px;
+            background-color: #fafafa;
+            border-radius: 6px;
+        }
+        .info-input {
+            width: 95%;
+            border: none;
+            border-bottom: 1.5px dotted #000;
+            text-align: center;
+            font-size: 14px;
+            font-family: inherit;
+            font-weight: 800;
+            background: transparent;
+            margin: 3px 0;
+            padding: 0;
+            outline: none;
+            color: #000;
+        }
+
+        .header-left {
+            width: 30%;
+            text-align: right;
+        }
+        .header-left p {
+            margin: 0;
+            padding: 0;
+            font-size: 15px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            line-height: 1.8;
+            color: #000;
+        }
+        .number-input, .text-date-input {
+            border: none;
+            border-bottom: 2px solid #000;
+            outline: none;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 15px;
+            background: transparent;
+            padding: 0;
+            color: #000;
+        }
+        .number-input {
+            width: 120px;
+            text-align: center;
+        }
+        .text-date-input {
+            width: 100%;
+            text-align: right;
+        }
+
+        /* غلاف حقل التاريخ (النص + زر التقويم + منتقي التاريخ المخفي) */
+        .date-field-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            width: 135px;
+        }
+        .calendar-btn {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1;
+            flex-shrink: 0;
+            filter: grayscale(0.2);
+        }
+        .calendar-btn:hover {
+            transform: scale(1.15);
+        }
+        /* منتقي التاريخ الفعلي: موجود ومرسوم فعلياً (opacity 0) حتى تعمل showPicker، لكنه غير مرئي وبلا مساحة تُذكر */
+        .date-picker-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+            border: none;
+        }
+
+        /* تنسيق الجدول */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 25px;
+            table-layout: fixed;
+            border: 3px solid #000000;
+        }
+        th, td {
+            border: 2.5px solid #000000;
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 800;
+            color: #000000;
+            word-wrap: break-word;
+            box-sizing: border-box;
+        }
+        
+        th.day-col, td.day-col {
+            width: 13%;
+        }
+        th.date-col, td.date-col {
+            width: 17%;
+            font-size: 20px !important; /* تكبير خط رأس عمود التاريخ */
+        }
+
+        th {
+            background-color: #e3f2fd;
+            color: #000000; 
+            font-weight: 900;
+        }
+        
+        td.day-col {
+            background-color: #fce4ec;
+            color: #000000;
+            font-weight: 900;
+        }
+
+        td[contenteditable="true"]:focus {
+            outline: 2px solid #3498db;
+            background-color: #fffff0;
+        }
+
+        .day-select, .row-date-input {
+            width: 100%;
+            padding: 4px;
+            border: none;
+            font-family: inherit;
+            text-align: center;
+            box-sizing: border-box;
+            background: transparent;
+            outline: none;
+            color: #000000;
+        }
+
+        .day-select {
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        /* تكبير مدخل التاريخ إلى 20 بكسل بخط عريض */
+        .row-date-input {
+            font-size: 20px !important;
+            font-weight: 900 !important;
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* غلاف تاريخ الصف داخل الجدول يمتد بعرض الخلية بالكامل */
+        td.date-col .date-field-wrapper {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* تذييل الصفحة */
+        .footer-section {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .notes-container {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        /* تصميم صندوق ملاحظات مرن وتلقائي الارتفاع بالكامل */
+        .notes-area {
+            width: 100%;
+            min-height: 80px; /* يبدأ بحجم صغير ويتمدد بسلاسة مع الكتابة */
+            height: auto;
+            border: 2.5px solid #000;
+            border-radius: 4px;
+            padding: 10px;
+            outline: none;
+            font-family: inherit;
+            font-weight: 700;
+            color: #000;
+            resize: none; /* إلغاء مقبض السحب اليدوي ليعتمد على التمدد التلقائي */
+            background: transparent;
+            font-size: 14px;
+            line-height: 1.6;
+            box-sizing: border-box;
+            overflow-y: hidden; /* إخفاء شريط التمرير أثناء التمدد */
+        }
+
+        .signature-container {
+            display: flex;
+            justify-content: flex-end; 
+            width: 100%;
+        }
+        .signature-box {
+            width: 35%; /* توسيع الخانة قليلاً لتستوعب الحجم الأكبر مريحاً */
+            text-align: center;
+        }
+        .signature-box p {
+            margin: 0;
+            padding: 0;
+            line-height: 1.4;
+            color: #000;
+        }
+        /* تقليص المسافة وتكبير مسمى مدير المدرسة */
+        .director-title {
+            font-weight: 900;
+            font-size: 16px;
+            margin-bottom: 12px !important; 
+        }
+        /* تكبير اسم المدير إلى 20 بكسل وبخط عريض جداً وبارز */
+        .director-name-line {
+            outline: none;
+            border: none;
+            display: inline-block;
+            width: 100%;
+            padding-top: 5px;
+            font-weight: 900 !important;
+            font-size: 20px !important;
+        }
+
+        /* ======================================================== */
+        /* إعدادات الطباعة الصارمة لتثبيت الإطار الخارجي للـ A4 وتجنب الالتصاق */
+        /* ======================================================== */
+        @media print {
+            @page {
+                margin: 0; /* تصفير الهامش التلقائي للتحكم بالإطار بدقة - لا يوجد فرض لمقاس محدد، لترك حرية الاتجاه لنافذة الطباعة نفسها */
+            }
+            body {
+                background-color: #fff !important;
+                padding: 0;
+                margin: 0;
+                height: 100%;
+            }
+            
+            /* تم تقليص مسافة الهامش الخارجي للإطار إلى 0.5 سم (5mm) بدلاً من 1 سم (10mm) */
+            /* هذا يوفر تباعداً داخلياً إضافياً بمقدار 5 ملم ويمنع التصاق محتويات الجدول به */
+            .print-border-frame {
+                display: block !important;
+                position: absolute !important;
+                top: 5mm !important;
+                bottom: 5mm !important;
+                left: 5mm !important;
+                right: 5mm !important;
+                box-sizing: border-box !important;
+                z-index: 9999 !important;
+                /* لا يوجد هنا فرض لنمط حد معيّن؛ يتم الاعتماد على الصنف (frame-*) المُختار من القائمة
+                   ليظهر نفس النمط المعروض على الشاشة تماماً عند الطباعة، دون التأثير في أي إعداد طباعة آخر */
+            }
+
+            .page-container {
+                margin: 0 !important;
+                padding: 40px !important; /* تقليص الحشو الداخلي ليحاذي الإطار الجديد بانسجام تام */
+                box-shadow: none !important;
+                position: relative !important;
+                box-sizing: border-box !important;
+                background: transparent !important;
+                /* لا يوجد ارتفاع أو حد أقصى مفروض هنا عمداً: الحاوية تكبر بحسب محتواها الفعلي
+                   (رأس + جدول + ملاحظات) حتى لا يُقصّ أي جزء من المحتوى ولا يتراكب مع الإطار */
+            }
+            /* عرض الحاوية فقط حسب الاتجاه المختار (بدون أي فرض لمقاس @page أو تدوير) -
+               اتجاه الورقة الفعلي (عمودي/أفقي) يجب اختياره يدوياً من داخل نافذة الطباعة نفسها،
+               لأن بعض المتصفحات (خصوصاً أندرويد) لا تلتزم بتبديل اتجاه CSS تلقائياً */
+            .page-container.orientation-portrait {
+                width: 210mm !important;
+                min-height: 297mm !important;
+            }
+            .page-container.orientation-landscape {
+                width: 297mm !important;
+                min-height: 210mm !important;
+            }
+            /* منع قص أي عنصر في منتصفه عند الانتقال بين الصفحات (خصوصاً مهم بالوضع الأفقي حيث المساحة الرأسية أقل) */
+            tr, .notes-area, .signature-container, .header-section {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .control-panel {
+                display: none !important;
+            }
+            #landscapeHint {
+                display: none !important;
+            }
+            .calendar-btn, .date-picker-hidden {
+                display: none !important;
+            }
+            .info-input, .school-name-input, .number-input, .text-date-input {
+                border-bottom: none; 
+            }
+            .notes-area {
+                border: 2.5px solid #000; 
+                padding: 10px;
+                resize: none;
+            }
+            .day-select {
+                border: none;
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                background: transparent;
+                font-size: 13px;
+                color: #000000;
+                padding: 0;
+                text-align: center;
+            }
+            /* الحفاظ على حجم خط التاريخ الكبير عند الطباعة */
+            .row-date-input {
+                border: none;
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                background: transparent;
+                font-size: 20px !important;
+                font-weight: 900 !important;
+                color: #000000;
+                padding: 0;
+                text-align: center;
+            }
+            th, td {
+                font-size: 13px;
+                padding: 6px 3px; 
+            }
+            th.date-col, td.date-col {
+                font-size: 20px !important; /* فرض المقاس الكبير لعمود التاريخ بالكامل عند الطباعة */
+            }
+            th {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            td.day-col {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            /* الحفاظ على حجم خط اسم المدير الكبير عند الطباعة */
+            .director-name-line {
+                font-size: 20px !important;
+                font-weight: 900 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="control-panel">
+    <h3>لوحة تحكم الأستاذة علياء 🛠️</h3>
+    
+    <div class="selectors-grid">
+        <!-- 1. مصفوفة ألوان العناوين -->
+        <div class="selector-box">
+            <label for="themeSelect">🎨 لون تعبئة صف العناوين:</label>
+            <select id="themeSelect" class="theme-select" onchange="applyColorTheme(this.value)">
+                <option value="blue">أزرق فاتح كلاسيكي</option>
+                <option value="darkblue">أزرق غامق (أنيق ومميز)</option>
+                <option value="navy">كحلي (رسمي وقار)</option>
+                <option value="green">أخضر هادئ ومريح</option>
+                <option value="grey">رمادي رسمي</option>
+                <option value="pink">وردي ناعم متناسق</option>
+                <option value="gold">ذهبي / بيج دافئ</option>
+                <option value="white">أبيض ناصع كلاسيكي</option>
+            </select>
+        </div>
+
+        <!-- 2. مصفوفة ألوان عمود الأيام -->
+        <div class="selector-box">
+            <label for="dayThemeSelect">📅 لون تعبئة عمود الأيام:</label>
+            <select id="dayThemeSelect" class="theme-select" onchange="applyDayColorTheme(this.value)">
+                <option value="pink">وردي كلاسيكي (افتراضي)</option>
+                <option value="darkred">أحمر غامق (أنيق ومميز)</option>
+                <option value="navy">كحلي (رسمي وقار)</option>
+                <option value="beige">بيج هادئ</option>
+                <option value="lavender">أرجواني ناعم (لافندر)</option>
+                <option value="mint">أخضر فاتح (نعناعي)</option>
+                <option value="softgrey">رمادي هادئ</option>
+                <option value="purewhite">أبيض عادي</option>
+            </select>
+        </div>
+
+        <!-- 3. اختيار نوع الخط الجديد للمشروع -->
+        <div class="selector-box">
+            <label for="fontSelect">🖋️ نوع خط الجدول والصفحة:</label>
+            <select id="fontSelect" class="theme-select" onchange="applyFontFamily(this.value)">
+                <option value="Cairo">خط القاهرة (رسمي وعصري)</option>
+                <option value="Tajawal">خط تجول (ناعم وبسيط)</option>
+                <option value="Amiri">خط أميري (كلاسيكي عريق)</option>
+                <option value="Changa">خط الجيزة (عريض وجريء)</option>
+                <option value="Almarai">🗜️ خط الماراي (مضغوط - يوفّر مساحة)</option>
+                <option value="Mada">🗜️ خط مدى (مضغوط جداً - أقصى توفير)</option>
+                <option value="Elmessiri">🗜️ خط المسيري (مضغوط وأنيق)</option>
+            </select>
+        </div>
+
+        <!-- 4. اختيار نمط حدود الجدول -->
+        <div class="selector-box">
+            <label for="borderStyleSelect">🏁 نمط حدود الجدول:</label>
+            <select id="borderStyleSelect" class="theme-select" onchange="applyTableBorderStyle(this.value)">
+                <option value="solid">خط عادي مصمت (Solid)</option>
+                <option value="double">خط مزدوج رسمي (Double)</option>
+                <option value="dotted">خط منقط (Dotted)</option>
+                <option value="dashed">خط متقطع (Dashed)</option>
+                <option value="none">❌ بدون حدود (مخطط مفتوح)</option>
+            </select>
+        </div>
+
+        <!-- 5. اختيار نمط حد الصفحة (الإطار الخارجي) -->
+        <div class="selector-box">
+            <label for="pageBorderSelect">🖼️ نمط حد الصفحة:</label>
+            <select id="pageBorderSelect" class="theme-select" onchange="applyPageBorderStyle(this.value)">
+                <option value="double">مزدوج رسمي (Double)</option>
+                <option value="solid">خط عادي مصمت (Solid)</option>
+                <option value="thick">خط عريض سميك (Thick)</option>
+                <option value="dashed">خط متقطع (Dashed)</option>
+                <option value="dotted">خط منقط (Dotted)</option>
+                <option value="groove">محفور بارز (Groove)</option>
+                <option value="ridge">بارز مجسم (Ridge)</option>
+                <option value="none">❌ بدون إطار للصفحة</option>
+            </select>
+        </div>
+
+        <!-- 6. اختيار اتجاه ورقة الطباعة -->
+        <div class="selector-box">
+            <label for="printOrientationSelect">🖨️ اتجاه الطباعة:</label>
+            <select id="printOrientationSelect" class="theme-select" onchange="applyPrintOrientation(this.value)">
+                <option value="portrait">📄 عمودي (Portrait)</option>
+                <option value="landscape">📃 أفقي (Landscape)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ملاحظة تظهر فقط عند اختيار الوضع الأفقي؛ تختفي تلقائياً عند الطباعة -->
+    <p id="landscapeHint" style="display:none; text-align:center; color:#b91c1c; font-weight:800; font-size:13px; margin:-10px 0 15px;">
+        ⚠️ بعض الأجهزة (خصوصاً أندرويد) لا تُغيّر اتجاه الورقة تلقائياً. عند فتح نافذة الطباعة/حفظ PDF،
+        تأكدي من اختيار "أفقي / Landscape" يدوياً من إعدادات الاتجاه هناك (عادة بجانب حجم الورقة أو ضمن "المزيد من الإعدادات").
+    </p>
+
+    <p>📋 حددي الصفوف الدراسية النشطة لجدول الامتحان:</p>
+    <div class="checkbox-group">
+        <label><input type="checkbox" class="grade-selector" value="grade1" checked> الصف الأول</label>
+        <label><input type="checkbox" class="grade-selector" value="grade2" checked> الصف الثاني</label>
+        <label><input type="checkbox" class="grade-selector" value="grade3" checked> الصف الثالث</label>
+        <label><input type="checkbox" class="grade-selector" value="grade4" checked> الصف الرابع</label>
+        <label><input type="checkbox" class="grade-selector" value="grade5" checked> الصف الخامس</label>
+        <label><input type="checkbox" class="grade-selector" value="grade6" checked> الصف السادس</label>
+    </div>
+    
+    <button class="btn" onclick="addNewRow()">➕ إضافة يوم جديد</button>
+    <button class="btn btn-delete" onclick="deleteLastRow()">➖ حذف آخر صف</button>
+    <button class="btn btn-print" onclick="window.print()">🖨️ طباعة الجدول / حفظ PDF</button>
+    <span class="save-status" id="saveStatus">✓ تم حفظ التغييرات تلقائياً</span>
+</div>
+
+<div class="page-container orientation-portrait" id="printablePage">
+    <!-- البرواز الثابت والآمن بداخل الورقة -->
+    <div class="print-border-frame frame-double" id="printBorderFrame"></div>
+
+    <!-- رأس الصفحة -->
+    <div class="header-section">
+        <div class="header-right">
+            <h3>
+                <span>ادارة مدرسة</span><br>
+                <input type="text" id="schoolName" class="school-name-input" placeholder="اسم مدرسة هنا">
+            </h3>
+        </div>
+
+        <div class="header-center">
+            <input type="text" id="infoType" class="info-input" placeholder="نوع الامتحان" value="الامتحانات التحريرية">
+            <input type="text" id="infoPeriod" class="info-input" placeholder="الفترة" value="امتحانات نصف السنة">
+            <input type="text" id="infoRole" class="info-input" placeholder="الدور" value="الدور الأول">
+            <input type="text" id="infoYear" class="info-input" placeholder="العام الدراسي" value="العام الدراسي: ٢٠٢٥ - ٢٠٢٦">
+        </div>
+
+        <div class="header-left">
+            <p>العدد / <input type="text" id="docNumber" class="number-input" placeholder="الرقم هنا"></p>
+            <p>التاريخ: 
+                <span class="date-field-wrapper">
+                    <input type="text" id="headerDate" class="text-date-input" placeholder="٢٠٢٦/٠٧/١٥">
+                    <button type="button" class="calendar-btn" title="اختيار من التقويم" onclick="openDatePicker(this)">📅</button>
+                    <input type="date" class="date-picker-hidden" onchange="onDatePicked(this)">
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <!-- الجدول الرئيسي -->
+    <table id="examTable">
+        <thead>
+            <tr id="headerRow">
+                <th class="day-col">اليوم</th>
+                <th class="date-col">التاريخ</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- سيتم توليد الصفوف تلقائياً -->
+        </tbody>
+    </table>
+
+    <!-- تذييل الصفحة -->
+    <div class="footer-section">
+        <div class="notes-container">
+            <strong style="display:block; margin-bottom: 8px;">الملاحظات:</strong>
+            <textarea id="notes" class="notes-area" placeholder="أكتبي هنا أي ملاحظات إضافية (يتسع تلقائياً لعدد لا نهائي من الأسطر)..."></textarea>
+        </div>
+
+        <div class="signature-container">
+            <div class="signature-box">
+                <p class="director-title">مدير المدرسة</p>
+                <p id="directorName" class="director-name-line" contenteditable="true">الأستاذ / الأستاذة</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // مصفوفة الألوان الخاصة بالعناوين
+    const colorThemes = {
+        blue: { bg: "#e3f2fd", text: "#000000" },
+        darkblue: { bg: "#1565c0", text: "#ffffff" },
+        navy: { bg: "#0d1b2a", text: "#ffffff" },
+        green: { bg: "#e8f5e9", text: "#000000" },
+        grey: { bg: "#f5f5f5", text: "#000000" },
+        pink: { bg: "#fce4ec", text: "#000000" },
+        gold: { bg: "#fff8e1", text: "#000000" },
+        white: { bg: "#ffffff", text: "#000000" }
+    };
+
+    // مصفوفة ألوان عمود الأيام
+    const dayColorThemes = {
+        pink: "#fce4ec",
+        darkred: "#ffcdd2", 
+        navy: "#b0bec5", 
+        beige: "#f5f5dc",
+        lavender: "#f3e5f5",
+        mint: "#e8f5e9",
+        softgrey: "#eeeeee",
+        purewhite: "#ffffff"
+    };
+
+    let currentTheme = "blue"; 
+    let currentDayTheme = "pink";
+    let currentBorderStyle = "solid";
+    let currentFont = "Cairo"; // الخط الافتراضي
+    let currentPageBorderStyle = "double"; // نمط حد الصفحة الافتراضي
+    let currentPrintOrientation = "portrait"; // اتجاه ورقة الطباعة الافتراضي
+
+    // دالة ترجمة أسماء الصفوف
+    function getGradeDisplayName(grade) {
+        const mapping = {
+            'grade1': "الصف الأول",
+            'grade2': "الصف الثاني",
+            'grade3': "الصف الثالث",
+            'grade4': "الصف الرابع",
+            'grade5': "الصف الخامس",
+            'grade6': "الصف السادس",
+            'grade١': "الصف الأول",
+            'grade٢': "الصف الثاني",
+            'grade٣': "الصف الثالث",
+            'grade٤': "الصف الرابع",
+            'grade٥': "الصف الخامس",
+            'grade٦': "الصف السادس"
+        };
+        return mapping[grade] || grade || "صف غير معروف";
+    }
+
+    let activeGrades = ['grade1', 'grade2', 'grade3', 'grade4', 'grade5', 'grade6'];
+    const daysOfWeek = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
+
+    // دالة تحويل الأرقام الإنجليزية إلى هندية/عربية
+    function convertToArabicNumerals(str) {
+        const arabicNorm = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+        return str.replace(/[0-9]/g, function (w) {
+            return arabicNorm[+w];
+        });
+    }
+
+    // فتح منتقي التاريخ (التقويم) المرتبط بحقل تاريخ معيّن عند الضغط على زر 📅
+    function openDatePicker(btn) {
+        const wrapper = btn.closest('.date-field-wrapper');
+        if (!wrapper) return;
+        const picker = wrapper.querySelector('.date-picker-hidden');
+        if (!picker) return;
+
+        // مزامنة قيمة المنتقي مع القيمة الحالية للحقل النصي (إن كانت بصيغة سنة/شهر/يوم) قبل فتحه
+        const textInput = wrapper.querySelector('.text-date-input, .row-date-input');
+        if (textInput && textInput.value) {
+            const normalized = convertArabicNumeralsToLatin(textInput.value).replace(/\//g, '-').trim();
+            const parts = normalized.split('-');
+            if (parts.length === 3 && parts[0].length === 4) {
+                picker.value = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+            }
+        }
+
+        if (typeof picker.showPicker === 'function') {
+            try { picker.showPicker(); } catch (e) { picker.focus(); picker.click(); }
+        } else {
+            picker.focus();
+            picker.click();
+        }
+    }
+
+    // عند اختيار تاريخ من التقويم: تعبئة الحقل النصي المرتبط بصيغة المشروع (سنة/شهر/يوم بأرقام عربية)
+    function onDatePicked(picker) {
+        if (!picker.value) return;
+        const wrapper = picker.closest('.date-field-wrapper');
+        if (!wrapper) return;
+        const textInput = wrapper.querySelector('.text-date-input, .row-date-input');
+        if (!textInput) return;
+
+        const [yyyy, mm, dd] = picker.value.split('-');
+        textInput.value = `${convertToArabicNumerals(yyyy)}/${convertToArabicNumerals(mm)}/${convertToArabicNumerals(dd)}`;
+        triggerSaveStatus();
+        saveData();
+    }
+
+    // دالة مساعدة: تحويل الأرقام العربية/الهندية الموجودة في نص إلى أرقام إنجليزية (لازمة لمزامنة المنتقي)
+    function convertArabicNumeralsToLatin(str) {
+        const arabicNorm = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+        return str.replace(/[٠-٩]/g, function (w) {
+            return String(arabicNorm.indexOf(w));
+        });
+    }
+
+    // دالة مساعدة: بناء غلاف حقل تاريخ الصف (نص + زر تقويم + منتقي تاريخ مخفي) لتفادي تكرار الكود
+    function createRowDateWrapper(dateValue) {
+        const wrapper = document.createElement('span');
+        wrapper.className = "date-field-wrapper";
+
+        const dateInput = document.createElement('input');
+        dateInput.type = "text";
+        dateInput.className = "row-date-input";
+        dateInput.value = dateValue;
+
+        const btn = document.createElement('button');
+        btn.type = "button";
+        btn.className = "calendar-btn";
+        btn.title = "اختيار من التقويم";
+        btn.textContent = "📅";
+        btn.setAttribute('onclick', 'openDatePicker(this)');
+
+        const picker = document.createElement('input');
+        picker.type = "date";
+        picker.className = "date-picker-hidden";
+        picker.setAttribute('onchange', 'onDatePicked(this)');
+
+        wrapper.appendChild(dateInput);
+        wrapper.appendChild(btn);
+        wrapper.appendChild(picker);
+        return wrapper;
+    }
+
+    // دالة التوسيع التلقائي لصندوق الملاحظات
+    function autoResizeNotes() {
+        const notes = document.getElementById('notes');
+        notes.style.height = 'auto';
+        notes.style.height = notes.scrollHeight + 'px';
+    }
+
+    // تطبيق نوع الخط على الجسم الرئيسي والمدخلات والجدول بالكامل بقوة (Force Override)
+    function applyFontFamily(fontName) {
+        currentFont = fontName;
+        const allFontClasses = ['font-cairo', 'font-tajawal', 'font-amiri', 'font-changa', 'font-almarai', 'font-mada', 'font-elmessiri'];
+        
+        // إزالة الكلاسات السابقة للخطوط
+        const targetContainer = document.getElementById('printablePage');
+        targetContainer.classList.remove(...allFontClasses);
+        
+        // تطبيق كلاس الخط الجديد مباشرة على حاوية الصفحة بالكامل
+        const className = 'font-' + fontName.toLowerCase();
+        targetContainer.classList.add(className);
+        
+        // تطبيق نفس الفئة على كافة عناصر الكتابة والمدخلات بشكل صارم بداخل الحاوية
+        const elementsToForce = targetContainer.querySelectorAll('input, textarea, select, td, th, p, span, div');
+        elementsToForce.forEach(el => {
+            el.classList.remove(...allFontClasses);
+            el.classList.add(className);
+        });
+
+        saveData();
+    }
+
+    // تطبيق ألوان العناوين
+    function applyColorTheme(themeName) {
+        currentTheme = themeName;
+        const theme = colorThemes[themeName] || colorThemes.blue;
+        
+        const thElements = document.querySelectorAll('#headerRow th');
+        thElements.forEach(th => {
+            if (!th.classList.contains('day-col')) {
+                th.style.setProperty('background-color', theme.bg, 'important');
+                th.style.setProperty('color', theme.text, 'important');
+            }
+        });
+        saveData();
+    }
+
+    // تطبيق ألوان عمود الأيام
+    function applyDayColorTheme(themeName) {
+        currentDayTheme = themeName;
+        const color = dayColorThemes[themeName] || dayColorThemes.pink;
+        
+        const dayHeader = document.querySelector('#headerRow th.day-col');
+        if (dayHeader) {
+            dayHeader.style.setProperty('background-color', color, 'important');
+            dayHeader.style.setProperty('color', '#000000', 'important');
+        }
+
+        const dayCells = document.querySelectorAll('#tableBody td.day-col');
+        dayCells.forEach(cell => {
+            cell.style.setProperty('background-color', color, 'important');
+        });
+        saveData();
+    }
+
+    // تطبيق نمط حدود الجدول
+    function applyTableBorderStyle(styleName) {
+        currentBorderStyle = styleName;
+        const table = document.getElementById('examTable');
+        const cells = document.querySelectorAll('#examTable th, #examTable td');
+        
+        table.style.borderStyle = styleName;
+        cells.forEach(cell => {
+            cell.style.borderStyle = styleName;
+            if (styleName === 'none') {
+                cell.style.borderWidth = '0px';
+            } else {
+                cell.style.borderWidth = '2.5px';
+            }
+        });
+        
+        if (styleName === 'none') {
+            table.style.borderWidth = '0px';
+        } else {
+            table.style.borderWidth = '3px';
+        }
+        saveData();
+    }
+
+    // تطبيق نمط حد الصفحة (الإطار الخارجي) - يغيّر فقط شكل الحد ولا يمس أي إعداد طباعة آخر (المقاس/الهوامش)
+    function applyPageBorderStyle(styleName) {
+        currentPageBorderStyle = styleName;
+        const frame = document.getElementById('printBorderFrame');
+        if (frame) {
+            frame.classList.remove('frame-double', 'frame-solid', 'frame-thick', 'frame-dashed', 'frame-dotted', 'frame-groove', 'frame-ridge', 'frame-none');
+            frame.classList.add('frame-' + styleName);
+        }
+        saveData();
+    }
+
+    // تطبيق اتجاه ورقة الطباعة (عمودي/أفقي): يبدّل صنف حاوية الصفحة على الشاشة والطباعة معاً،
+    // ويُظهر ملاحظة تذكيرية عند اختيار الوضع الأفقي لأن بعض الأجهزة تتطلب اختيار الاتجاه يدوياً من نافذة الطباعة
+    function applyPrintOrientation(orientation) {
+        currentPrintOrientation = orientation;
+        const container = document.getElementById('printablePage');
+        const hint = document.getElementById('landscapeHint');
+
+        if (container) {
+            container.classList.remove('orientation-portrait', 'orientation-landscape');
+            container.classList.add('orientation-' + orientation);
+        }
+        if (hint) {
+            hint.style.display = (orientation === 'landscape') ? 'block' : 'none';
+        }
+        saveData();
+    }
+
+    // تحويل الأرقام وحفظ البيانات عند الكتابة
+    document.addEventListener('input', function(e) {
+        const target = e.target;
+        
+        if ((target.tagName === 'INPUT' && target.type !== 'date') || target.tagName === 'TEXTAREA') {
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
+            const originalVal = target.value;
+            const converted = convertToArabicNumerals(originalVal);
+            if (originalVal !== converted) {
+                target.value = converted;
+                target.setSelectionRange(start, end);
+            }
+            if (target.id === 'notes') {
+                autoResizeNotes();
+            }
+        } else if (target.hasAttribute('contenteditable')) {
+            const originalText = target.innerText;
+            const convertedText = convertToArabicNumerals(originalText);
+            if (originalText !== convertedText) {
+                target.innerText = convertedText;
+                placeCaretAtEnd(target);
+            }
+        }
+        
+        triggerSaveStatus();
+        saveData();
+    });
+
+    function placeCaretAtEnd(el) {
+        el.focus();
+        if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
+            var range = document.createRange();
+            range.selectNodeContents(el);
+            range.collapse(false);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+    }
+
+    function triggerSaveStatus() {
+        const status = document.getElementById('saveStatus');
+        status.textContent = "⏳ جاري الحفظ تلقائياً...";
+        status.style.color = "#e67e22";
+        clearTimeout(window.saveTimer);
+        window.saveTimer = setTimeout(() => {
+            status.textContent = "✓ تم حفظ التغييرات تلقائياً";
+            status.style.color = "#27ae60";
+        }, 800);
+    }
+
+    function updateTableHeaders() {
+        const headerRow = document.getElementById('headerRow');
+        headerRow.innerHTML = `
+            <th class="day-col">اليوم</th>
+            <th class="date-col">التاريخ</th>
+        `;
+
+        const totalSubjectWidth = 70;
+        const columnWidth = (totalSubjectWidth / activeGrades.length).toFixed(2);
+
+        activeGrades.forEach(grade => {
+            const th = document.createElement('th');
+            th.textContent = getGradeDisplayName(grade);
+            th.style.width = `${columnWidth}%`;
+            headerRow.appendChild(th);
+        });
+
+        rebuildTableRows();
+        applyColorTheme(currentTheme); 
+        applyDayColorTheme(currentDayTheme);
+        applyTableBorderStyle(currentBorderStyle);
+        applyFontFamily(currentFont); // ضمان تفعيل الخط بعد التحديث
+    }
+
+    function rebuildTableRows() {
+        const tableBody = document.getElementById('tableBody');
+        const rows = tableBody.querySelectorAll('tr');
+        
+        if (rows.length === 0) {
+            for (let i = 0; i < 3; i++) {
+                addNewRow();
+            }
+        } else {
+            const totalSubjectWidth = 70;
+            const columnWidth = (totalSubjectWidth / activeGrades.length).toFixed(2);
+
+            rows.forEach(row => {
+                const selectedDay = row.querySelector('.day-select') ? row.querySelector('.day-select').value : "السبت";
+                const selectedDate = row.querySelector('.row-date-input') ? row.querySelector('.row-date-input').value : "";
+                
+                const oldCells = Array.from(row.cells).slice(2).map(td => td.innerHTML);
+
+                row.innerHTML = `
+                    <td class="day-col">
+                        <select class="day-select">
+                            ${daysOfWeek.map(day => `<option value="${day}" ${day === selectedDay ? 'selected' : ''}>${day}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td class="date-col">
+                        <span class="date-field-wrapper">
+                            <input type="text" class="row-date-input" value="${selectedDate}" placeholder="٢٠٢٦/٠٧/١٥">
+                            <button type="button" class="calendar-btn" title="اختيار من التقويم" onclick="openDatePicker(this)">📅</button>
+                            <input type="date" class="date-picker-hidden" onchange="onDatePicked(this)">
+                        </span>
+                    </td>
+                `;
+                
+                activeGrades.forEach((grade, index) => {
+                    const td = document.createElement('td');
+                    td.contentEditable = "true";
+                    td.style.width = `${columnWidth}%`;
+                    td.innerHTML = oldCells[index] !== undefined ? oldCells[index] : "-";
+                    row.appendChild(td);
+                });
+            });
+        }
+    }
+
+    function addNewRow() {
+        const tableBody = document.getElementById('tableBody');
+        const tr = document.createElement('tr');
+
+        const totalSubjectWidth = 70;
+        const columnWidth = (totalSubjectWidth / activeGrades.length).toFixed(2);
+
+        const tdDay = document.createElement('td');
+        tdDay.className = "day-col";
+        const select = document.createElement('select');
+        select.className = "day-select";
+        daysOfWeek.forEach(day => {
+            const option = document.createElement('option');
+            option.value = day;
+            option.textContent = day;
+            select.appendChild(option);
+        });
+        tdDay.appendChild(select);
+        tr.appendChild(tdDay);
+
+        const tdDate = document.createElement('td');
+        tdDate.className = "date-col";
+        
+        const today = new Date();
+        const yyyy = convertToArabicNumerals(String(today.getFullYear()));
+        const mm = convertToArabicNumerals(String(today.getMonth() + 1).padStart(2, '0'));
+        const dd = convertToArabicNumerals(String(today.getDate()).padStart(2, '0'));
+        const defaultDateText = `${yyyy}/${mm}/${dd}`;
+
+        tdDate.appendChild(createRowDateWrapper(defaultDateText));
+        tr.appendChild(tdDate);
+
+        activeGrades.forEach(() => {
+            const tdSubject = document.createElement('td');
+            tdSubject.contentEditable = "true";
+            tdSubject.style.width = `${columnWidth}%`;
+            tdSubject.innerHTML = "-";
+            tr.appendChild(tdSubject);
+        });
+
+        tableBody.appendChild(tr);
+        applyDayColorTheme(currentDayTheme);
+        applyTableBorderStyle(currentBorderStyle);
+        applyFontFamily(currentFont); // تفعيل الخط على الصف الجديد
+        saveData();
+    }
+
+    function deleteLastRow() {
+        const tableBody = document.getElementById('tableBody');
+        if (tableBody.rows.length > 1) {
+            tableBody.deleteRow(-1);
+            saveData();
+            triggerSaveStatus();
+        } else {
+            alert("تنبيه: يجب إبقاء صف واحد على الأقل في الجدول.");
+        }
+    }
+
+    document.querySelectorAll('.grade-selector').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            activeGrades = [];
+            document.querySelectorAll('.grade-selector:checked').forEach(checkedBox => {
+                activeGrades.push(checkedBox.value);
+            });
+            updateTableHeaders();
+            saveData();
+        });
+    });
+
+    // حفظ البيانات
+    function saveData() {
+        const data = {
+            schoolName: document.getElementById('schoolName').value,
+            infoType: document.getElementById('infoType').value,
+            infoPeriod: document.getElementById('infoPeriod').value,
+            infoRole: document.getElementById('infoRole').value,
+            infoYear: document.getElementById('infoYear').value,
+            docNumber: document.getElementById('docNumber').value,
+            headerDate: document.getElementById('headerDate').value,
+            notes: document.getElementById('notes').value,
+            directorName: document.getElementById('directorName').innerText,
+            activeGrades: activeGrades,
+            currentTheme: currentTheme,
+            currentDayTheme: currentDayTheme,
+            currentBorderStyle: currentBorderStyle,
+            currentFont: currentFont, // حفظ الخط النشط
+            currentPageBorderStyle: currentPageBorderStyle, // حفظ نمط حد الصفحة
+            currentPrintOrientation: currentPrintOrientation, // حفظ اتجاه ورقة الطباعة
+            tableRows: []
+        };
+
+        const rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach(row => {
+            const rowData = {
+                day: row.querySelector('.day-select') ? row.querySelector('.day-select').value : '',
+                date: row.querySelector('.row-date-input') ? row.querySelector('.row-date-input').value : '',
+                subjects: []
+            };
+            const cells = Array.from(row.cells).slice(2);
+            cells.forEach(cell => {
+                rowData.subjects.push(cell.innerHTML);
+            });
+            data.tableRows.push(rowData);
+        });
+
+        localStorage.setItem('alyaaExamTableData_v12_fonts_fixed', JSON.stringify(data));
+    }
+
+    // استرجاع البيانات
+    function loadSavedData() {
+        const saved = localStorage.getItem('alyaaExamTableData_v12_fonts_fixed');
+        if (saved) {
+            const data = JSON.parse(saved);
+            
+            document.getElementById('schoolName').value = data.schoolName || '';
+            document.getElementById('infoType').value = data.infoType || '';
+            document.getElementById('infoPeriod').value = data.infoPeriod || '';
+            document.getElementById('infoRole').value = data.infoRole || '';
+            document.getElementById('infoYear').value = data.infoYear || '';
+            document.getElementById('docNumber').value = data.docNumber || '';
+            document.getElementById('headerDate').value = data.headerDate || '';
+            document.getElementById('notes').value = data.notes || '';
+            document.getElementById('directorName').innerText = data.directorName || 'الأستاذ / الأستاذة';
+
+            currentTheme = data.currentTheme || 'blue';
+            document.getElementById('themeSelect').value = currentTheme;
+
+            currentDayTheme = data.currentDayTheme || 'pink';
+            document.getElementById('dayThemeSelect').value = currentDayTheme;
+
+            currentBorderStyle = data.currentBorderStyle || 'solid';
+            document.getElementById('borderStyleSelect').value = currentBorderStyle;
+
+            currentFont = data.currentFont || 'Cairo';
+            document.getElementById('fontSelect').value = currentFont;
+
+            currentPageBorderStyle = data.currentPageBorderStyle || 'double';
+            document.getElementById('pageBorderSelect').value = currentPageBorderStyle;
+            applyPageBorderStyle(currentPageBorderStyle);
+
+            currentPrintOrientation = data.currentPrintOrientation || 'portrait';
+            document.getElementById('printOrientationSelect').value = currentPrintOrientation;
+            applyPrintOrientation(currentPrintOrientation);
+
+            activeGrades = data.activeGrades || ['grade1', 'grade2', 'grade3', 'grade4', 'grade5', 'grade6'];
+            document.querySelectorAll('.grade-selector').forEach(checkbox => {
+                checkbox.checked = activeGrades.includes(checkbox.value);
+            });
+
+            const totalSubjectWidth = 70;
+            const columnWidth = (totalSubjectWidth / activeGrades.length).toFixed(2);
+
+            const headerRow = document.getElementById('headerRow');
+            headerRow.innerHTML = `
+                <th class="day-col">اليوم</th>
+                <th class="date-col">التاريخ</th>
+            `;
+            activeGrades.forEach(grade => {
+                const th = document.createElement('th');
+                th.textContent = getGradeDisplayName(grade);
+                th.style.width = `${columnWidth}%`;
+                headerRow.appendChild(th);
+            });
+
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            if (data.tableRows && data.tableRows.length > 0) {
+                data.tableRows.forEach(rowData => {
+                    const tr = document.createElement('tr');
+
+                    const tdDay = document.createElement('td');
+                    tdDay.className = "day-col";
+                    const select = document.createElement('select');
+                    select.className = "day-select";
+                    daysOfWeek.forEach(day => {
+                        const option = document.createElement('option');
+                        option.value = day;
+                        option.textContent = day;
+                        if (day === rowData.day) option.selected = true;
+                        select.appendChild(option);
+                    });
+                    tdDay.appendChild(select);
+                    tr.appendChild(tdDay);
+
+                    const tdDate = document.createElement('td');
+                    tdDate.className = "date-col";
+                    tdDate.appendChild(createRowDateWrapper(rowData.date));
+                    tr.appendChild(tdDate);
+
+                    rowData.subjects.forEach(subj => {
+                        const tdSubj = document.createElement('td');
+                        tdSubj.contentEditable = "true";
+                        tdSubj.style.width = `${columnWidth}%`;
+                        tdSubj.innerHTML = subj;
+                        tr.appendChild(tdSubj);
+                    });
+
+                    tableBody.appendChild(tr);
+                });
+            } else {
+                rebuildTableRows();
+            }
+
+            applyColorTheme(currentTheme);
+            applyDayColorTheme(currentDayTheme);
+            applyTableBorderStyle(currentBorderStyle);
+            applyFontFamily(currentFont); // تطبيق الخط بعد الاسترجاع
+            autoResizeNotes(); // تهيئة الارتفاع بعد التحميل
+        } else {
+            const today = new Date();
+            const yyyy = convertToArabicNumerals(String(today.getFullYear()));
+            const mm = convertToArabicNumerals(String(today.getMonth() + 1).padStart(2, '0'));
+            const dd = convertToArabicNumerals(String(today.getDate()).padStart(2, '0'));
+            document.getElementById('headerDate').value = `${yyyy}/${mm}/${dd}`;
+            updateTableHeaders();
+            applyFontFamily(currentFont);
+            autoResizeNotes(); // تهيئة الارتفاع الافتراضي
+        }
+    }
+
+    window.onload = loadSavedData;
+</script>
+
+</body>
+</html>
