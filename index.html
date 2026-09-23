@@ -232,13 +232,44 @@
         // ===== كلمة المرور لم تعد مكتوبة هنا، بل بصمتها (Hash) فقط =====
         // لتغييرها: افتحي الملف make-hash.html على جهازك، اكتبي اسم المستخدم وكلمة المرور الجديدين،
         // ثم انسخي قيمتي SALT_HEX و HASH_HEX إلى هنا، وزيدي CREDENTIALS_VERSION بمقدار 1
-     const SALT_HEX = "c94399ad26f69aaa5202789ce2ac96b8";
-const HASH_HEX = "b8b25f7f1b20601854552d8fcd7e802888aa0618cefebc5de145720bba5203d2";
+      const SALT_HEX = "3e3da1d071fd915d121d4068a62807a6";
+const HASH_HEX = "273c0fe44c6c4e05503d77ef91eef6d91209b0359232f562f14ac4959fc061dc";
         const PBKDF2_ITERATIONS = 250000;
-        const CREDENTIALS_VERSION = 6;
+        const CREDENTIALS_VERSION = 7;
 
         // مدة صلاحية الجلسة: شهر واحد (30 يوم) بالمللي ثانية
         const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000;
+
+        // ===== تحكّم عن بُعد: ملف access.json في المستودع =====
+        // يُفحص عند كل فتح للتطبيق وهو متصل بالنت فقط (لا يعمل بدون نت)
+        // { "min_login_version": 1, "banned_users": ["اسم1","اسم2"] }
+        const ACCESS_URL = "access.json";
+
+        function forceLogout() {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("lastActivity");
+            localStorage.removeItem("credentialsVersion");
+            localStorage.removeItem("loggedInUser");
+        }
+
+        async function checkRemoteAccess() {
+            try {
+                const res = await fetch(ACCESS_URL + "?t=" + Date.now(), { cache: "no-store" });
+                if (!res.ok) return;
+                const data = await res.json();
+                const storedVersion = parseInt(localStorage.getItem("credentialsVersion"), 10);
+                const storedUser = localStorage.getItem("loggedInUser") || "";
+                const minVersion = parseInt(data.min_login_version, 10) || 0;
+                const banned = Array.isArray(data.banned_users) ? data.banned_users : [];
+
+                if (storedVersion < minVersion || banned.includes(storedUser)) {
+                    forceLogout();
+                    location.reload();
+                }
+            } catch (e) {
+                // بدون نت أو تعذّر الوصول للملف: لا شيء يتغيّر، يبقى الوضع الحالي كما هو
+            }
+        }
 
         window.onload = function() {
             const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -250,12 +281,18 @@ const HASH_HEX = "b8b25f7f1b20601854552d8fcd7e802888aa0618cefebc5de145720bba5203
 
             if (sessionValid && versionValid) {
                 showDashboard();
+                checkRemoteAccess();
             } else {
                 // انتهت مدة الجلسة، أو تغيّرت كلمة المرور، أو لا توجد جلسة صالحة: تسجيل خروج تلقائي
-                localStorage.removeItem("isLoggedIn");
-                localStorage.removeItem("lastActivity");
-                localStorage.removeItem("credentialsVersion");
+                forceLogout();
             }
+
+            // إعادة الفحص كل مرة يعود فيها المستخدم للتطبيق (تبديل نافذة، فتح من الخلفية)
+            document.addEventListener("visibilitychange", function () {
+                if (document.visibilityState === "visible" && localStorage.getItem("isLoggedIn") === "true") {
+                    checkRemoteAccess();
+                }
+            });
         };
 
         async function deriveHash(user, pass) {
@@ -279,7 +316,9 @@ const HASH_HEX = "b8b25f7f1b20601854552d8fcd7e802888aa0618cefebc5de145720bba5203
                 localStorage.setItem("isLoggedIn", "true");
                 localStorage.setItem("lastActivity", Date.now().toString());
                 localStorage.setItem("credentialsVersion", CREDENTIALS_VERSION.toString());
+                localStorage.setItem("loggedInUser", userInp);
                 showDashboard();
+                checkRemoteAccess();
             } else {
                 errorMsg.style.display = "block";
             }
@@ -295,9 +334,7 @@ const HASH_HEX = "b8b25f7f1b20601854552d8fcd7e802888aa0618cefebc5de145720bba5203
         }
 
         function logout() {
-            localStorage.removeItem("isLoggedIn");
-            localStorage.removeItem("lastActivity");
-            localStorage.removeItem("credentialsVersion");
+            forceLogout();
             location.reload(); 
         }
     </script>
