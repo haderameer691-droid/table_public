@@ -1,5 +1,5 @@
 // ارفعي رقم النسخة كلما عدّلتِ أي ملف ليتحدّث عند المستخدمين
-const VERSION = "v6";
+const VERSION = "v3";
 const CACHE = "school-portal-" + VERSION;
 
 // الملفات تُخزَّن كل واحد على حدة: لو غاب ملف لا يفشل التخزين كله
@@ -30,6 +30,13 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+
+  // access.json يتحكم بتسجيل الخروج عن بُعد، فيجب أن يصل دائمًا من الشبكة مباشرة بدون أي تخزين مؤقت
+  if (url.pathname.endsWith("access.json")) {
+    e.respondWith(fetch(req, { cache: "no-store" }).catch(() => new Response("{}", { headers: { "Content-Type": "application/json" } })));
+    return;
+  }
+
   const isFont = url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com";
   if (url.origin !== location.origin && !isFont) return;
 
