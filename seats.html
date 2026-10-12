@@ -110,11 +110,13 @@
         .student-slot {
             flex: 1; padding: 6px 4px; background: #fff; border: 2px solid #000000; border-radius: 4px;
             display: flex; flex-direction: column; justify-content: center; text-align: center;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
         
         .single-student-container {
             display: flex; flex-direction: column; justify-content: center; text-align: center; flex-grow: 1;
-            padding: 4px 0;
+            padding: 4px 0; border-radius: 4px;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
 
         .student-name { font-size: 14px; font-weight: 900; color: #000000; line-height: 1.3; }
@@ -124,6 +126,26 @@
         .grade-5 { color: #155724 !important; font-weight: 900; } 
         .grade-4 { color: #721c24 !important; font-weight: 900; } 
         .grade-default { color: #4b6584 !important; font-weight: 900; }
+
+        /* تعبئة ألوان المقاعد حسب الصف الدراسي (قابلة للتخصيص عبر القوائم المنسدلة) */
+        :root {
+            --grade-color-6: #d6e9ff;
+            --grade-color-5: #d4edda;
+            --grade-color-4: #f8d7da;
+            --grade-color-default: #e9ecef;
+        }
+        .grade-bg-6 { background-color: var(--grade-color-6) !important; }
+        .grade-bg-5 { background-color: var(--grade-color-5) !important; }
+        .grade-bg-4 { background-color: var(--grade-color-4) !important; }
+        .grade-bg-default { background-color: var(--grade-color-default) !important; }
+
+        /* عند إلغاء تفعيل تلوين المقاعد: إعادة الخلفية للأبيض في كل مكان (شاشة وطباعة) */
+        body.seat-colors-off .grade-bg-6,
+        body.seat-colors-off .grade-bg-5,
+        body.seat-colors-off .grade-bg-4,
+        body.seat-colors-off .grade-bg-default {
+            background-color: #ffffff !important;
+        }
 
         .empty-slot { color: #7f8c8d; font-style: italic; font-size: 11px; font-weight: bold; }
         .empty-seat-x {
@@ -217,7 +239,7 @@
                 padding: 6px 4px !important;
             }
             
-            .student-slot { border: 2px solid #000000 !important; background: #fff !important; padding: 4px 2px !important; }
+            .student-slot { border: 2px solid #000000 !important; padding: 4px 2px !important; }
             
             .student-name { font-size: 15px !important; font-weight: 900 !important; line-height: 1.3 !important; }
             .student-grade { font-size: 12px !important; font-weight: 900 !important; margin-top: 2px !important; }
@@ -333,6 +355,21 @@
             <div class="form-group"> <label for="academicYear">العام الدراسي:</label> <input type="text" id="academicYear" value="2026 - 2027" oninput="autoSaveData()"> </div>
             <div class="form-group"> <label for="schoolManager">مدير / مديرة المدرسة:</label> <input type="text" id="schoolManager" value="اسم مدير المدرسة " oninput="autoSaveData()"> </div>
         </div>
+
+        <div style="grid-column: 1 / -1; border-top: 1px dashed #cbd5e1; padding-top: 14px; margin-top: 4px;">
+            <div class="form-group" style="margin-bottom: 14px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:15px; cursor:pointer;">
+                    <input type="checkbox" id="seatColorsEnabled" checked onchange="toggleSeatColors()" style="width:auto; accent-color:#2c3e50;">
+                    🎨 تفعيل تلوين المقاعد حسب الصف (عند إلغاء التفعيل تُطبع المقاعد بدون ألوان)
+                </label>
+            </div>
+            <div id="gradeColorPickers" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;">
+                <div class="form-group"><label for="color6">لون الصف السادس:</label><select id="color6" onchange="updateGradeColors()"></select></div>
+                <div class="form-group"><label for="color5">لون الصف الخامس:</label><select id="color5" onchange="updateGradeColors()"></select></div>
+                <div class="form-group"><label for="color4">لون الصف الرابع:</label><select id="color4" onchange="updateGradeColors()"></select></div>
+                <div class="form-group"><label for="colorDefault">لون الصفوف غير المحددة:</label><select id="colorDefault" onchange="updateGradeColors()"></select></div>
+            </div>
+        </div>
     </div>
     
     <div class="controls">
@@ -369,6 +406,54 @@
         }
     }
 
+    const colorPalette = [
+        { label: 'أزرق فاتح', value: '#d6e9ff' },
+        { label: 'أخضر فاتح', value: '#d4edda' },
+        { label: 'أحمر فاتح', value: '#f8d7da' },
+        { label: 'أصفر فاتح', value: '#fff3cd' },
+        { label: 'برتقالي فاتح', value: '#ffe5d0' },
+        { label: 'بنفسجي فاتح', value: '#e5d9f2' },
+        { label: 'فيروزي', value: '#c3f0ec' },
+        { label: 'أخضر نعناعي', value: '#d1f7e3' },
+        { label: 'وردي', value: '#fde2e4' },
+        { label: 'رمادي فاتح', value: '#e9ecef' },
+        { label: 'أبيض (بدون تلوين)', value: '#ffffff' }
+    ];
+
+    function populateColorSelect(selectId, defaultValue) {
+        const sel = document.getElementById(selectId);
+        sel.innerHTML = '';
+        colorPalette.forEach(c => {
+            let opt = document.createElement('option');
+            opt.value = c.value;
+            opt.textContent = c.label;
+            if (c.value.toLowerCase() === defaultValue.toLowerCase()) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    }
+
+    function initColorSelects() {
+        populateColorSelect('color6', '#d6e9ff');
+        populateColorSelect('color5', '#d4edda');
+        populateColorSelect('color4', '#f8d7da');
+        populateColorSelect('colorDefault', '#e9ecef');
+    }
+
+    function updateGradeColors() {
+        document.documentElement.style.setProperty('--grade-color-6', document.getElementById('color6').value);
+        document.documentElement.style.setProperty('--grade-color-5', document.getElementById('color5').value);
+        document.documentElement.style.setProperty('--grade-color-4', document.getElementById('color4').value);
+        document.documentElement.style.setProperty('--grade-color-default', document.getElementById('colorDefault').value);
+        autoSaveData();
+    }
+
+    function toggleSeatColors() {
+        const enabled = document.getElementById('seatColorsEnabled').checked;
+        document.body.classList.toggle('seat-colors-off', !enabled);
+        document.getElementById('gradeColorPickers').style.opacity = enabled ? '1' : '0.5';
+        autoSaveData();
+    }
+
     function autoSaveData() {
         const dataToSave = {
             seatMode: document.getElementById('seatMode').value,
@@ -379,7 +464,12 @@
             examType: document.getElementById('examType').value,
             examTurn: document.getElementById('examTurn').value,
             academicYear: document.getElementById('academicYear').value,
-            schoolManager: document.getElementById('schoolManager').value
+            schoolManager: document.getElementById('schoolManager').value,
+            seatColorsEnabled: document.getElementById('seatColorsEnabled').checked,
+            color6: document.getElementById('color6').value,
+            color5: document.getElementById('color5').value,
+            color4: document.getElementById('color4').value,
+            colorDefault: document.getElementById('colorDefault').value
         };
         localStorage.setItem('examSystem_vFakhamaPrintSave', JSON.stringify(dataToSave));
     }
@@ -390,6 +480,8 @@
     }
 
     window.onload = function() {
+        initColorSelects();
+
         const saved = localStorage.getItem('examSystem_vFakhamaPrintSave');
         if (saved) {
             const data = JSON.parse(saved);
@@ -402,8 +494,16 @@
             document.getElementById('examTurn').value = data.examTurn;
             document.getElementById('academicYear').value = data.academicYear;
             document.getElementById('schoolManager').value = data.schoolManager;
+            if (typeof data.seatColorsEnabled === 'boolean') document.getElementById('seatColorsEnabled').checked = data.seatColorsEnabled;
+            if (data.color6) document.getElementById('color6').value = data.color6;
+            if (data.color5) document.getElementById('color5').value = data.color5;
+            if (data.color4) document.getElementById('color4').value = data.color4;
+            if (data.colorDefault) document.getElementById('colorDefault').value = data.colorDefault;
             toggleInputLabel();
         }
+
+        updateGradeColors();
+        toggleSeatColors();
 
         const savedHalls = localStorage.getItem('examSystem_vFakhamaHallState');
         if (savedHalls) {
@@ -660,6 +760,7 @@
             slot1.className = 'student-slot';
             if (item.p1 && item.p1.name) {
                 let gClass = getGradeClass(item.p1.grade);
+                slot1.className = 'student-slot ' + gClass.replace('grade-', 'grade-bg-');
                 slot1.innerHTML = `<div class="student-name">${item.p1.name}</div><div class="student-grade ${gClass}">${item.p1.grade}</div>`;
             } else {
                 slot1.innerHTML = `<div class="empty-slot">- فارغ -</div>`;
@@ -669,6 +770,7 @@
             slot2.className = 'student-slot';
             if (item.p2 && item.p2.name) {
                 let gClass = getGradeClass(item.p2.grade);
+                slot2.className = 'student-slot ' + gClass.replace('grade-', 'grade-bg-');
                 slot2.innerHTML = `<div class="student-name">${item.p2.name}</div><div class="student-grade ${gClass}">${item.p2.grade}</div>`;
             } else {
                 slot2.innerHTML = `<div class="empty-slot">- فارغ -</div>`;
@@ -679,8 +781,8 @@
             box.appendChild(container);
         } else {
             let container = document.createElement('div');
-            container.className = 'single-student-container';
             let gClass = getGradeClass(item.grade);
+            container.className = 'single-student-container ' + gClass.replace('grade-', 'grade-bg-');
             container.innerHTML = `<div class="student-name">${item.name}</div><div class="student-grade ${gClass}">${item.grade}</div>`;
             box.appendChild(container);
         }
