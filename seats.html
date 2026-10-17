@@ -185,9 +185,40 @@
         .slip-student-name { font-size: 15px; font-weight: 900; color: #000000; line-height: 1.3; margin-bottom: 4px; }
         .slip-student-grade { font-size: 12px; font-weight: 700; color: #333333; }
 
+
+        /* ===== تخطيط الشاشة: لوحة الإعدادات يمين، المعاينة يسار ===== */
+        @media screen {
+            .container { max-width: 1800px; }
+            .workspace {
+                display: grid;
+                grid-template-columns: 440px minmax(0, 1fr); /* العمود الأول = اليمين (RTL) */
+                gap: 20px; align-items: start;
+            }
+            .side-panel {
+                position: sticky; top: 10px;
+                max-height: calc(100vh - 20px); overflow-y: auto;
+                padding-left: 4px;
+            }
+            .side-panel .setup-section { grid-template-columns: 1fr; margin-bottom: 15px; }
+            .side-panel #gradeColorPickers { grid-template-columns: 1fr 1fr !important; }
+            .side-panel .controls { margin-bottom: 0; display: flex; flex-direction: column; }
+            .side-panel .controls button { margin: 4px 0; width: 100%; }
+            .preview-panel {
+                min-width: 0; background: #eef1f5; border-radius: 6px; padding: 15px;
+                min-height: 300px; overflow-x: auto;
+            }
+            .preview-panel .hall-card:last-child { margin-bottom: 0; }
+        }
+        @media screen and (max-width: 1000px) {
+            .workspace { grid-template-columns: 1fr; }
+            .side-panel { position: static; max-height: none; }
+        }
+
         /* ================= إعدادات التوزيع المرن التلقائي الذكي للطباعة ================= */
         @media print {
-            h1.main-title, .setup-section, .controls, .btn-sector-control, .door-notice { display: none !important; }
+            h1.main-title, .setup-section, .controls, .side-panel, .btn-sector-control, .door-notice { display: none !important; }
+            .workspace { display: block !important; }
+            .preview-panel { background: none !important; padding: 0 !important; overflow: visible !important; }
             
             body { background: white; margin: 0; padding: 0; }
             .container { box-shadow: none; padding: 0; max-width: 100%; margin: 0; }
@@ -262,8 +293,8 @@
                 display: block !important; 
             }
             
-            body.print-sectors-mode > .container > #outputArea > .hall-card > .hall-header-table { display: none !important; }
-            body.print-sectors-mode > .container > #outputArea > .hall-card > .hall-footer { display: none !important; }
+            body.print-sectors-mode #outputArea > .hall-card > .hall-header-table { display: none !important; }
+            body.print-sectors-mode #outputArea > .hall-card > .hall-footer { display: none !important; }
             body.print-sectors-mode .sector-header, body.print-sectors-mode .sector-divider { display: none !important; }
 
             body.print-sectors-mode .sector-block {
@@ -286,6 +317,8 @@
             /* ================= وضعية طباعة قصاصات أسماء التلاميذ (للمقاعد) ================= */
             body.print-slips-mode h1.main-title,
             body.print-slips-mode .setup-section,
+            body.print-slips-mode .side-panel,
+            body.print-slips-mode .preview-panel,
             body.print-slips-mode .controls,
             body.print-slips-mode #outputArea { display: none !important; }
 
@@ -310,6 +343,8 @@
 <div class="container">
     <h1 class="main-title">نظام التوزيع والخرائط الامتحانية للمدارس Prepared by/Alia M.K.  </h1>
     
+    <div class="workspace">
+    <div class="side-panel">
     <div class="setup-section">
         <div>
             <div class="form-group">
@@ -380,7 +415,12 @@
         <button class="btn-danger" onclick="resetForm()">❌ تفريغ البيانات</button>
     </div>
     
-    <div id="outputArea"></div>
+    </div><!-- /side-panel -->
+
+    <div class="preview-panel">
+        <div id="outputArea"></div>
+    </div>
+    </div><!-- /workspace -->
     <div id="slipsArea" class="slips-area"></div>
 </div>
 
