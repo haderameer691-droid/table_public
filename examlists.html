@@ -26,8 +26,8 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            max-width: 950px;
-            margin: 0 auto 30px auto;
+            width: 100%;
+            margin: 0;
         }
 
         .control-panel h2 {
@@ -274,6 +274,53 @@
         .btn-dark { background-color: #4a5568; color: white; }
         .btn-dark:hover { background-color: #2d3748; }
 
+        /* ===== تخطيط ثنائي الأعمدة: الإدخال يمين، المعاينة والطباعة يسار ===== */
+        .app-layout {
+            display: grid;
+            grid-template-columns: minmax(380px, 1fr) minmax(0, 1fr);
+            gap: 20px;
+            align-items: start;
+            max-width: 1900px;
+            margin: 0 auto;
+        }
+
+        .preview-col {
+            position: sticky;
+            top: 10px;
+            max-height: calc(100vh - 20px);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .preview-toolbar {
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .preview-toolbar .btn { flex: 1; }
+
+        .preview-scroll {
+            overflow: auto;
+            flex: 1;
+            background: #dfe3e8;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .preview-scale { transform-origin: top center; }
+
+        @media (max-width: 1000px) {
+            .app-layout { grid-template-columns: 1fr; }
+            .preview-col { position: static; max-height: none; }
+            .preview-scroll { overflow-x: auto; }
+        }
+
         .page-container {
             display: flex;
             justify-content: center;
@@ -467,7 +514,11 @@
 
         @media print {
             @page { margin: 8mm; }
-            .control-panel { display: none; }
+            .control-panel, .preview-toolbar { display: none; }
+            .app-layout { display: block; max-width: none; }
+            .preview-col { position: static; max-height: none; display: block; }
+            .preview-scroll { overflow: visible; background: none; padding: 0; border-radius: 0; }
+            .preview-scale { zoom: 1 !important; }
             body { background: none; padding: 0; }
             .page { box-shadow: none; padding: 0; width: 100%; min-height: auto; }
             .editable-cell { border: none; }
@@ -479,6 +530,8 @@
     </style>
 </head>
 <body>
+
+<div class="app-layout">
 
 <div class="control-panel">
     <h2>
@@ -701,13 +754,16 @@
         </div>
     </div>
 
-    <div style="display: flex; gap: 10px;">
-        <button class="btn btn-success" onclick="generateTable(true)" style="flex: 1;">تحديث ومعاينة الجدول</button>
-        <button class="btn btn-danger" onclick="window.print()" style="width: 150px;">طباعة القائمة</button>
-    </div>
 </div>
 
-<!-- المعاينة والطباعة -->
+<!-- المعاينة والطباعة (يسار) -->
+<div class="preview-col">
+    <div class="preview-toolbar">
+        <button class="btn btn-success" onclick="generateTable(true)">تحديث ومعاينة الجدول</button>
+        <button class="btn btn-danger" onclick="window.print()">طباعة القائمة</button>
+    </div>
+    <div class="preview-scroll" id="previewScroll">
+    <div class="preview-scale" id="previewScale">
 <div class="page-container">
     <div class="page">
         <div class="page-content">
@@ -748,8 +804,27 @@
         <div class="print-footer" id="printFooterContainer"></div>
     </div>
 </div>
+    </div><!-- /preview-scale -->
+    </div><!-- /preview-scroll -->
+</div><!-- /preview-col -->
+
+</div><!-- /app-layout -->
 
 <script>
+    // ملاءمة عرض الورقة مع عرض عمود المعاينة
+    function fitPreview() {
+        const box = document.getElementById('previewScroll');
+        const scaler = document.getElementById('previewScale');
+        if (!box || !scaler) return;
+        const pageEl = scaler.querySelector('.page');
+        const pageW = pageEl ? pageEl.offsetWidth : 794;
+        const avail = box.clientWidth - 20;
+        scaler.style.zoom = Math.min(1, avail / pageW);
+    }
+    window.addEventListener('resize', fitPreview);
+    window.addEventListener('load', fitPreview);
+    if (window.ResizeObserver) new ResizeObserver(fitPreview).observe(document.getElementById('previewScroll'));
+
     function convertToArabicNumbers(str) {
         if (!str && str !== 0) return '';
         const langSelect = document.getElementById('numberLangSelect');
