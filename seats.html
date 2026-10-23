@@ -6,7 +6,7 @@
     <!-- استدعاء خط Cairo الفخم للترويسات والتذييل -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&family=Tajawal:wght@400;700;800;900&family=Almarai:wght@400;700;800&family=Noto+Kufi+Arabic:wght@400;700;900&family=IBM+Plex+Sans+Arabic:wght@400;700&family=Changa:wght@400;700;800&family=El+Messiri:wght@400;700&family=Reem+Kufi:wght@400;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         body {
@@ -145,6 +145,12 @@
         body.seat-colors-off .grade-bg-4,
         body.seat-colors-off .grade-bg-default {
             background-color: #ffffff !important;
+        }
+
+        /* خط المقاعد (يتغير من القائمة المنسدلة) */
+        :root { --seat-font: 'Cairo'; }
+        .seat-number, .student-name, .student-grade, .empty-slot, .slip-student-name, .slip-student-grade {
+            font-family: var(--seat-font), 'Segoe UI', Tahoma, sans-serif !important;
         }
 
         .empty-slot { color: #7f8c8d; font-style: italic; font-size: 11px; font-weight: bold; }
@@ -393,6 +399,10 @@
 
         <div style="grid-column: 1 / -1; border-top: 1px dashed #cbd5e1; padding-top: 14px; margin-top: 4px;">
             <div class="form-group" style="margin-bottom: 14px;">
+                <label for="seatFont">🔤 نوع خط المقاعد:</label>
+                <select id="seatFont" onchange="updateSeatFont()"></select>
+            </div>
+            <div class="form-group" style="margin-bottom: 14px;">
                 <label style="display:flex; align-items:center; gap:8px; font-size:15px; cursor:pointer;">
                     <input type="checkbox" id="seatColorsEnabled" checked onchange="toggleSeatColors()" style="width:auto; accent-color:#2c3e50;">
                     🎨 تفعيل تلوين المقاعد حسب الصف (عند إلغاء التفعيل تُطبع المقاعد بدون ألوان)
@@ -479,6 +489,38 @@
         populateColorSelect('colorDefault', '#e9ecef');
     }
 
+    const seatFonts = [
+        { label: 'القاهرة (Cairo) - عريض وواضح', value: 'Cairo' },
+        { label: 'تجوال (Tajawal) - عصري ومقروء', value: 'Tajawal' },
+        { label: 'المراعي (Almarai) - نظيف وبسيط', value: 'Almarai' },
+        { label: 'نوتو كوفي (Noto Kufi) - كوفي واضح', value: 'Noto Kufi Arabic' },
+        { label: 'آي بي إم بلكس (IBM Plex) - رسمي', value: 'IBM Plex Sans Arabic' },
+        { label: 'شانجا (Changa) - ثقيل وقوي', value: 'Changa' },
+        { label: 'المسيري (El Messiri) - أنيق', value: 'El Messiri' },
+        { label: 'ريم كوفي (Reem Kufi) - هندسي', value: 'Reem Kufi' },
+        { label: 'أميري (Amiri) - نسخ تقليدي', value: 'Amiri' },
+        { label: 'نوتو نسخ (Noto Naskh) - نسخ مقروء', value: 'Noto Naskh Arabic' },
+        { label: 'تاهوما (Tahoma) - خط النظام', value: 'Tahoma' }
+    ];
+
+    function initFontSelect() {
+        const sel = document.getElementById('seatFont');
+        sel.innerHTML = '';
+        seatFonts.forEach(f => {
+            let opt = document.createElement('option');
+            opt.value = f.value;
+            opt.textContent = f.label;
+            opt.style.fontFamily = `'${f.value}', sans-serif`;
+            sel.appendChild(opt);
+        });
+    }
+
+    function updateSeatFont() {
+        const font = document.getElementById('seatFont').value || 'Cairo';
+        document.documentElement.style.setProperty('--seat-font', `'${font}'`);
+        autoSaveData();
+    }
+
     function updateGradeColors() {
         document.documentElement.style.setProperty('--grade-color-6', document.getElementById('color6').value);
         document.documentElement.style.setProperty('--grade-color-5', document.getElementById('color5').value);
@@ -509,7 +551,8 @@
             color6: document.getElementById('color6').value,
             color5: document.getElementById('color5').value,
             color4: document.getElementById('color4').value,
-            colorDefault: document.getElementById('colorDefault').value
+            colorDefault: document.getElementById('colorDefault').value,
+            seatFont: document.getElementById('seatFont').value
         };
         localStorage.setItem('examSystem_vFakhamaPrintSave', JSON.stringify(dataToSave));
     }
@@ -521,6 +564,7 @@
 
     window.onload = function() {
         initColorSelects();
+        initFontSelect();
 
         const saved = localStorage.getItem('examSystem_vFakhamaPrintSave');
         if (saved) {
@@ -539,9 +583,11 @@
             if (data.color5) document.getElementById('color5').value = data.color5;
             if (data.color4) document.getElementById('color4').value = data.color4;
             if (data.colorDefault) document.getElementById('colorDefault').value = data.colorDefault;
+            if (data.seatFont) document.getElementById('seatFont').value = data.seatFont;
             toggleInputLabel();
         }
 
+        updateSeatFont();
         updateGradeColors();
         toggleSeatColors();
 
